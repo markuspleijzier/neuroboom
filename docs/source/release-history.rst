@@ -2,6 +2,9 @@
 Release History
 ===============
 
+v0.1.3 (2020-12-3)
+* interactive dendrogram fix
+
 v0.1.2 (2020-12-3)
 * node bug fixed
 
