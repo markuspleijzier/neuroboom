@@ -2,7 +2,10 @@
 Release History
 ===============
 
-v0.1.0 (2020-12-3)
+v0.1.2 (2020-12-3)
+* node bug fixed
+
+v0.1.1 (2020-12-3)
 Fixed
 
 * bug import
