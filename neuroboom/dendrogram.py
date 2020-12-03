@@ -138,6 +138,26 @@ def plot_dendrogram(x, heal_neuron=True,
                     presyn_size=.1, postsyn_size=.1,
                     prog='dot'):
 
+    """
+    Takes a navis neuron and creates a graph layout
+
+    Parameters
+    ----------
+    x : A navis neuron object
+
+    returned_object : graph, graph_and_positions, positions
+
+    prog : The layout type, can be dot, neato or fdp
+
+    Returns
+    -------
+    graph : skeleton nodes as graph nodes with links between them as edges
+    positions : a dictionary of the positions on the 2D plane of each node
+
+    Examples
+    --------
+    """
+
     if not isinstance(x, (navis.TreeNeuron, navis.neuronlist.NeuronList)):
         raise ValueError('Need to pass a Navis Tree Neuron type')
     elif isinstance(x, navis.neuronlist.NeuronList):
@@ -305,7 +325,25 @@ def interactive_dendrogram(
     inscreen=True,
     filename=None,
 ):
+    """
+    Takes a navis neuron and creates a graph layout
 
+    Parameters
+    ----------
+    x : A navis neuron object
+
+    returned_object : graph, graph_and_positions, positions
+
+    prog : The layout type, can be dot, neato or fdp
+
+    Returns
+    -------
+    graph : skeleton nodes as graph nodes with links between them as edges
+    positions : a dictionary of the positions on the 2D plane of each node
+
+    Examples
+    --------
+    """
     z = check_valid_neuron_input(z)
     assert prog in VALID_PROGS, "Unknown program parameter!"
 
