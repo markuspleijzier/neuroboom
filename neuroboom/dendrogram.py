@@ -6,7 +6,8 @@ import navis
 from matplotlib import pyplot as plt
 import numpy as np
 import networkx as nx
-from neuroboom.utils import check_valid_neuron_input, calc_cable
+from neuroboom.utils import calc_cable
+# from neuroboom.utils import check_valid_neuron_input
 from itertools import chain
 # import plotly as py
 # from plotly.graph_objs import *
