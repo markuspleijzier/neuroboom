@@ -2,6 +2,9 @@
 Release History
 ===============
 
+v0.1.8 (2020-12-11)
+* upload fix 4
+
 v0.1.7 (2020-12-11)
 * upload fix 3
 
