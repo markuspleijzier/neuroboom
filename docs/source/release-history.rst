@@ -2,6 +2,10 @@
 Release History
 ===============
 
+v0.1.5 (2020-12-11)
+* upload fix
+
+
 v0.1.4 (2020-12-11)
 * functions in dendrogram.py, connectivity.py, morphoelectric.py, utils.py, stats.py tidied using typing module
 * creating an adjacency matrix from synaptic connections expanded to function on both presynapses and postsynapses
