@@ -6,3 +6,8 @@ networkx
 plotly
 pandas
 pymaid
+phate
+sklearn
+scprep
+scipy
+tqdm

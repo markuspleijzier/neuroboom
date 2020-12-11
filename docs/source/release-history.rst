@@ -2,6 +2,13 @@
 Release History
 ===============
 
+v0.1.4 (2020-12-11)
+* functions in dendrogram.py, connectivity.py, morphoelectric.py, utils.py, stats.py tidied using typing module
+* creating an adjacency matrix from synaptic connections expanded to function on both presynapses and postsynapses
+* new function for checking whether the input is a navis neuron
+* added the morphoelectric functions to create a passive electrotonic model of any neuron
+* added clustering functions to find the nodes belonging to the same compartments
+
 v0.1.3 (2020-12-3)
 * interactive dendrogram fix
 

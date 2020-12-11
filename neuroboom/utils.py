@@ -12,207 +12,192 @@ import pymaid
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
 
-
-def calc_cable(x, return_skdata=False):
-
+def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
     """
-    Calculates cable length of navis neurons
+    Takes an object and checks whether it is a navis TreeNeuron object
 
     Parameters
-    ----------
-    x : A navis neuron object
-
-    returned_object : graph, graph_and_positions, positions
-
-    prog : The layout type, can be dot, neato or fdp
+    --------
+    x: a python object: hopefully a navis.TreeNeuron object
 
     Returns
-    -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
-
-    Examples
     --------
+    x: returns x if it is a navis.TreeNeuron object, otherwise will raise an assertion error
 
     """
+    assert isinstance(
+        x, (navis.TreeNeuron, navis.neuronlist.NeuronList)
+    ), f"Need to pass a Navis Tree Neuron type. You have passed: {x}"
 
-    if not isinstance(x, (navis.TreeNeuron, navis.neuronlist.NeuronList)):
-        raise ValueError('Need to pass a Navis Tree Neuron type')
-    elif isinstance(x, navis.neuronlist.NeuronList):
-        if len(x) > 1:
-            raise ValueError('Need to pass a SINGLE CatmaidNeuron')
-        else:
-            x = x[0]
+    if isinstance(x, navis.neuronlist.NeuronList):
+        assert len(x) < 1, "Need to pass a SINGLE Neuron"
+        x = x[0]
+    return x
+
+def calc_cable(
+    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    return_skdata: bool = False):
+    """
+    # Calculate cable length between nodes - this function does not exist for navis neurons
+    :param x:
+    :param return_skdata:
+    :return:
+    """
+
+    x = check_valid_neuron_input(x)
 
     nodes = x.nodes[~x.nodes.parent_id.isnull()]
-    tn_coords = nodes[['x', 'y', 'z']].values
+    tn_coords = nodes[["x", "y", "z"]].values
 
-    this_tn = nodes.set_index('node_id')
-    parent_coords = this_tn.reindex(nodes.parent_id.values, ['x', 'y', 'z']).values
+    this_tn = nodes.set_index("node_id")
+    parent_coords = this_tn.reindex(nodes.parent_id.values, ["x", "y", "z"]).values
 
     w = np.sqrt(np.sum((tn_coords - parent_coords) ** 2, axis=1))
 
     if return_skdata:
-        nodes.loc[~nodes.parent_id.isnull(), 'parent_dist'] = w / 1000
+        nodes.loc[~nodes.parent_id.isnull(), "parent_dist"] = w / 1000
         x.nodes = nodes
-        return(x)
+        return x
 
     return np.sum(w[np.logical_not(np.isnan(w))]) / 1000
 
 
-def topological_sorting_of_nodes(x, return_object=['list', 'dict']):
+def check_valid_pymaid_input(x: Any) -> Optional[pymaid.core.CatmaidNeuron]:
 
     """
-    Topological sorting of treenodes. Nodes and their parents are adjacent in the treenode table
+    Takes an object and checks whether it is a navis TreeNeuron object
 
-    Parameters
-    ----------
-    x : A navis neuron object
-
-    returned_object : graph, graph_and_positions, positions
-
-    prog : The layout type, can be dot, neato or fdp
+    Paramters
+    --------
+    x: a python object: hopefully a navis.TreeNeuron object
 
     Returns
-    -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
+    --------
+    x: returns x if it is a navis.TreeNeuron object, otherwise will raise an assertion error
+
+    """
+    assert isinstance(
+        x, (pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList)
+    ), f"Need to pass a Navis Tree Neuron type. You have passed: {x}"
+
+    if isinstance(x, pymaid.core.CatmaidNeuron):
+        assert len(x) < 1, "Need to pass a SINGLE Neuron"
+        x = x[0]
+    return x
+
+
+def pymaid_topological_sort(
+
+    x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
+    return_skdata: bool = False):
+
+    """
+    Takes pymaid/CatmaidNeuron and topologically sorts the nodes
+
+    Paramters
+    ---------
+    x:                a pymaid/Catmaid neuron object
+    return_skdata:    bool
+                    whether to return a list of node_ids topologically sorted
+                    or to return a dict where the keys are treenodes and the values
+                    are ranking in the topological sort
+
+    Returns
+    --------
+    x: list or dict
 
     Examples
     --------
+
+
+
     """
+
+    x = check_valid_pymaid_input(x)
 
     g = nx.DiGraph()
     g.add_node(x.nodes[x.nodes.type == 'root'].treenode_id.values[0])
-    root = x.nodes[x.nodes.type == 'root'].treenode_id.values[0]
-    nodes_to_add = [i for i in x.nodes.treenode_id.tolist() if i != root]
-    g.add_nodes_from(nodes_to_add)
+    g.add_nodes_from(
+        [
+            i for i in x.nodes.node_id.tolist()
+            if i != x.nodes[x.nodes.type == 'root'].treenode_id.values[0]
+        ]
+    )
 
-    for e in x.nodes[['treenode_id', 'parent_id']].values:
+    for e in x.nodes[['treenode_id','parent_id']].values:
 
-        if e[1] is None:
+        if e[1] is not None:
 
-            continue
+            g.add_edge(e[1], e[0])
 
         else:
 
-            g.add_edge(e[1], e[0])
+            continue
 
     topological_sort = [i for i in nx.topological_sort(g)]
 
     if return_object == 'list':
-
         return(topological_sort)
-
     elif return_object == 'dict':
-
-        topological_sort = dict(zip(topological_sort, range(0, len(topological_sort))))
-
+        topological_sort = didct(zip(topological_sort, range(0, len(topological_sort))))
         return(topological_sort)
 
+    def pymaid_to_navis(
+    x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList]):
 
-######################################################################
-
-def prepare_neuron(x, change_units=True, factor=1e3):
     """
-    Prepares neuron for electrotonic modelling
+    Takes pymaid/CatmaidNeuron and topologically sorts the nodes
 
-    Parameters
-    ----------
-    x : A navis neuron object
+    Paramters
+    ---------
+    x:                a pymaid/Catmaid neuron object
 
-    returned_object : graph, graph_and_positions, positions
-
-    prog : The layout type, can be dot, neato or fdp
+    return_skdata:    bool
+                      whether to return a list of node_ids topologically sorted
+                      or to return a dict where the keys are treenodes and the values
+                      are ranking in the topological sort
 
     Returns
-    -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
+    --------
+    x: list or dict
 
     Examples
     --------
-    """
-    node_sort = dict([(i, k) for i, k in zip(range(len(x.nodes)), pymaid.node_label_sorting(x))])
-    node_sort_rev = {i: j for j, i in node_sort.items()}
-    # x = pymaid.downsample_neuron(x, resampling_factor = float('inf'))
-    # x = pymaid.guess_radius(x)
-    x.nodes['rank'] = x.nodes.treenode_id.map(node_sort_rev).tolist()
-    x.nodes.sort_values(by=['rank'], ascending=True, inplace=True)
-    x.nodes.reset_index(drop=True, inplace=True)
-
-    x = pymaid.calc_cable(x, return_skdata=True)
-
-    if not change_units:
-        return(x)
-    else:
-        x.nodes['x'] = x.nodes['x'] / factor
-        x.nodes['y'] = x.nodes['y'] / factor
-        x.nodes['z'] = x.nodes['z'] / factor
-        x.nodes['radius'] = x.nodes['radius'] / factor
-        x.nodes['parent_dist'] = x.nodes['parent_dist'] / factor
-        return(x)
 
 
-def pymaid_to_navis(x):
-    """
-    Converts pymaid neuron types to navis
 
-
-    Parameters
-    ----------
-    x : A navis neuron object
-
-    returned_object : graph, graph_and_positions, positions
-
-    prog : The layout type, can be dot, neato or fdp
-
-    Returns
-    -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
-
-    Examples
-    --------
     """
 
-    if isinstance(x, pymaid.core.CatmaidNeuron):
-        pass
-    else:
-        return('Need to pass a Catmaid Neuron!')
+    x = check_valid_pymaid_input(x)
 
-    if isinstance(x, pymaid.core.CatmaidNeuronList):
-        if len(x) > 1:
-            return('Need to pass a single Catmaid Neuron')
-        else:
-            x = x[0]
+    x.nodes['rank'] = x.nodes.treenode_id.map(pymaid_topological_sort(x, return_object = 'dict'))
+    x.nodes.sort_values(by = ['rank'], ascending = True, inplace = True)
 
-    # Getting topological sort of pymaid neuron
-    x.nodes['rank'] = x.nodes.treenode_id.map(topological_sorting_of_nodes(x, return_object='dict'))
-    x.nodes.sort_values(by=['rank'], ascending=True, inplace=True)
-
-    # Getting the graph object of pymaid neuron and passing that to an empty navis TreeNeuron object
+    # Getting the topological sort of the pymaid neuron
     x_graph = x.graph
     navis_neuron = navis.TreeNeuron(x_graph)
 
     # Populating the xyz columns of nodes
-    for i, j in enumerate(x.nodes[['x', 'y', 'z']].values):
+
+    for i, j in enumerate(x.nodes[['x','y','z']].values):
 
         navis_neuron.nodes.loc[i, 'x'] = j[0]
         navis_neuron.nodes.loc[i, 'y'] = j[1]
         navis_neuron.nodes.loc[i, 'z'] = j[2]
 
-    # Adding type column
+    # adding type column
     navis_neuron.nodes['type'] = x.nodes.type.copy()
 
-    # Adding connectors
+    # adding connectors
     navis_neuron.connectors = x.connectors.copy()
-    navis_neuron.connectors = ['pre' if i == 0 else 'post' for i in navis_neuron.connectors.type]
+    navis_neuron.connectors = [ 'pre' if i == 0 else 'post' for i in navis_neuron.connectors.type ]
 
-    # Adding soma
+    # adding soma & name
+
     navis_neuron.soma = x.soma
-
-    # Adding name
     navis_neuron.name = x.neuron_name
 
     return(navis_neuron)
+
+
+    

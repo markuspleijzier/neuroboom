@@ -2,15 +2,13 @@
 
 import time
 import navis
-# from typing import Tuple, Optional, List, Union
+from typing import Tuple, Optional, List, Union
 from matplotlib import pyplot as plt
 import numpy as np
 import networkx as nx
 from neuroboom.utils import calc_cable
-# from neuroboom.utils import check_valid_neuron_input
+from neuroboom.utils import check_valid_neuron_input
 from itertools import chain
-# import plotly as py
-# from plotly.graph_objs import *
 import plotly.graph_objs as go
 from plotly.offline import plot, iplot
 
@@ -61,7 +59,11 @@ VALID_PROGS = ["fdp", "dot", "neato"]
 # This script contains functions for plotting dendrograms, static and interactive
 # Create Graph Structure
 
-def create_graph_structure(x, returned_object='graph', prog='dot'):
+def create_graph_structure(
+    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    returned_object: str = 'graph',
+    prog: str = 'dot'):
+
     """
     Takes a navis neuron and creates a graph layout
 
@@ -82,23 +84,20 @@ def create_graph_structure(x, returned_object='graph', prog='dot'):
     --------
     """
 
-    if not isinstance(x, (navis.TreeNeuron, navis.neuronlist.NeuronList)):
-        raise ValueError('Need to pass a Navis Tree Neuron type')
-    elif isinstance(x, navis.neuronlist.NeuronList):
-        if len(x) > 1:
-            raise ValueError('Need to pass a SINGLE neuron')
-        else:
-            x = x[0]
+    x = check_valid_neuron_input(x)
 
     valid_objects = ['graph', 'positions', 'graph_and_positions']
-    if returned_object not in valid_objects:
-        raise ValueError('Unknown object type to return!')
 
-    valid_progs = ['fdp', 'dot', 'neato']
-    if prog not in valid_progs:
-        raise ValueError('Unknown program parameter!')
+    assert isinstance(returned_object, str), f"You need to pass a string for the returned object. You have passed: {returned_object}"
+
+    assert (returned_object in valid_objects), f"You need to pass a valid object to return. These include: {valid_objects}"
+
+    valid_progs = ['fdp' ,'dot', 'neato']
+
+    assert (prog in valid_progs), f"Invalid program parameter. You need to pass one of {valid_progs}"
 
     print('Creating Graph Structure...')
+
     g = nx.DiGraph()
     g.add_nodes_from(x.nodes.node_id)
     for e in x.nodes[['node_id', 'parent_id', 'parent_dist']].values:
@@ -125,57 +124,144 @@ def create_graph_structure(x, returned_object='graph', prog='dot'):
 
 # dendrogram
 
-def plot_dendrogram(x, heal_neuron = True,
-                    downsample_neuron = 0.0,
-                    plot_connectors = True,
-                    connector_confidence = (0.0, 0.0),
-                    highlight_connectors = None,
-                    fragment = False,
-                    presyn_color = [[.9, .0, .0]],
-                    postsyn_color = [[.0, .0, .9]],
-                    highlight_connector_color = [[.0, .9, .0]],
-                    highlight_connector_size = 20,
-                    presyn_size = .1, postsyn_size = .1,
-                    prog = 'dot'):
+def plot_dendrogram(
+    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    heal_neuron: bool = False,
+    downsample_neuron: float = 0.0,
+    plot_connectors: bool = True,
+    connector_confidence: Tuple[float, float] = (0.0, 0.0),
+    highlight_connectors: Optional = None,
+    fragment: bool = False,
+    presyn_color: List[List[float]] = [[.9, .0, .0]],
+    postsyn_color: List[List[float]] = [[.0, .0, .9]],
+    highlight_connector_color: List[List[float]] = [[.0, .9, .0]],
+    highlight_connector_size: int = 20,
+    presyn_size: float = .1,
+    postsyn_size: float = .1,
+    prog: str = 'dot'):
+
     """
-    Takes a navis neuron and creates a graph layout
+    This function creates a 2-dimensional dendrogram, a 'flattened' version of a neuron.
+    Dendrograms can be used to visualise the locations of specific partner synapses.
 
     Parameters
     ----------
-    x : A navis neuron object
+    x :                navis.TreeNeuron
 
-    returned_object : graph, graph_and_positions, positions
+                        A single navis tree neuron object
 
-    prog : The layout type, can be dot, neato or fdp
+    heal_neuron :      bool
+
+                        Whether you want to heal the neuron or not. N.B. Navis neurons
+                        should be healed on import, i.e. navis.fetch_skeletons(bodyid, heal = True)
+                        see navis.fetch_skeletons and navis.heal_fragmented_neuron for more details
+
+    downsample_neuron: float
+
+                        A float specifying the downsampling factor used by navis.downsample_neuron()
+                        If 0.0, then no downsampling will occur. If float('inf') then this will reduce
+                        the neuron to branch and end points.
+
+                        It is recommended to downsample very large neurons when testing out this code
+                        for the first time.
+
+    plot_connectors:   bool
+
+                        Whether to plot presynapses and postsynapses on the dendrogram or not.
+
+    connector_confidence: tuple
+
+                        The confidence value used to threshold the synapses.
+                        The first value (connector_confidence[0]) will be used to threshold presynapses
+                        The second value (connector_confidence[1]) will be used to threshold postsynapses
+
+    highlight_connectors: optional | np.array | dict
+
+                        If a numpy array, then this should be a numpy array of the treenodes connected to the connectors that you want to highlight.
+                        The single color and size will be specified in highlight_connector_color and highlight_connector_size
+
+                        If a dictionary, then this should be a dictionary where the key values are treenode ids of the connectors you want to highlight
+                        and their values should be the color you want to colour them.
+
+                        Passing dictionaries to this parameter allow for synapses to be coloured differently
+
+    fragment:           bool
+
+                        Whether the neuron object you are passing is a fragment or not (i.e. does it have a soma or not)
+
+    presyn_color:       list
+
+                        A list containing the rgb values that you want to colour the presynapses.
+                        All presynapses will be coloured this color
+
+    postsyn_color:      list
+
+                        A list containing the rgb values that you want to colour the postsynapses.
+                        All postsynapses will be coloured this color
+
+    highlight_connector_color: list
+
+                        A list containing the rgb values that you want to color your special synapses
+
+    highlight_connector_size: int
+
+                        The size of the synapses you want to highlight on the dendrogram
+
+    presyn_size:         int
+
+                        The size of all presynapses on the dendrogram
+
+    postsyn_size:        int
+
+                        The size of all postsynapses on the dendrogrm
+
+    prog :             str
+
+                       The layout type used by navis.nx_agraph.graphviz_layout()
+                       Valid programs include [dot, neato or fdp].
+                       The dot program provides a hierarchical layout, this is the fastest program
+                       The neato program creates edges between nodes proportional to their real length.
+                       The neato program takes the longest amount of time, can be ~2hrs for a single neuron!
+
 
     Returns
     -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
+    fig: a figure of containing the dendrogram
 
-    Examples
+
+    Example
     --------
+    from neuroboom.utils import create_graph_structure
+    from neuroboom.dendrogram import plot_dendrogram
+    import navis.interfaces.neuprint as nvneu
+    from matplotlib import pyplot as plt
+
+    test_neuron = nvneu.fetch_skeletons(722817260)
+
+    plt.clf()
+    fig, ax = plt.subplots(figsize = (20,20))
+    plot_dendrogram(test_neuron, prog = 'dot')
+    plt.show()
+
     """
 
-    if not isinstance(x, (navis.TreeNeuron, navis.neuronlist.NeuronList)):
-        raise ValueError('Need to pass a Navis Tree Neuron type')
-    elif isinstance(x, navis.neuronlist.NeuronList):
-        if len(x) > 1:
-            raise ValueError('Need to pass a SINGLE Neuron')
-        else:
-            x = x[0]
+    x = check_valid_neuron_input(x)
 
-    if not isinstance(connector_confidence, tuple):
-        raise ValueError('Need to pass a tuple for confidence values')
-    elif isinstance(connector_confidence, tuple):
-        if len(connector_confidence) != 2:
-            raise ValueError('''Need to pass a tuple containing two values for confidence.
-                             \n The first value is the confidence threshold for presynapses.
-                             \n The second value is the confidence threshold for postsynapses''')
+    assert isinstance(
+        connector_confidence,
+        tuple
+    ), f"Need to pass a tuple for confidence values. You have passed a {type(connector_confidence)}"
+
+    assert (
+        len(connector_confidence) == 2
+    ), """
+    Need to pass a tuple containing two values for confidence. \n
+    The first value is the confidence threshold for presynapses. \n
+    The second value is the confidence threshold for postsynapses. """
 
     valid_progs = ['fdp','dot','neato']
-    if prog not in valid_progs:
-        raise ValueError('Unknown program parameter!')
+
+    assert (prog in valid_progs), f"Invalid program parameter. You need to pass one of {valid_progs}"
 
     start = time.time()
 
@@ -255,38 +341,98 @@ def plot_dendrogram(x, heal_neuron = True,
     print('Completed in %is' % int(time.time() - start))
 
 
-def interactive_dendrogram(z, heal_neuron = True, plot_nodes = True,
-                           plot_connectors = True,
-                           highlight_connectors = None, in_volume = None,
-                           prog = 'dot', inscreen = True, filename = None):
+# Plot an interactive dendrogram
+def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+                           heal_neuron: bool = True,
+                           plot_nodes: bool = True,
+                           plot_connectors: bool = True,
+                           highlight_connectors: Optional = None,
+                           in_volume: Optional = None,
+                           prog: str = 'dot',
+                           inscreen: bool = True,
+                           filename: Optional = None):
 
     """
-    Takes a navis neuron and creates a graph layout
+    Takes a navis neuron and returns an interactive 2D dendrogram.
+    In this dendrogram, nodes or connector locations can be highlighted
+
 
     Parameters
     ----------
-    x : A navis neuron object
+    x:                    A navis neuron object
 
-    returned_object : graph, graph_and_positions, positions
+    heal_neuron: bool
 
-    prog : The layout type, can be dot, neato or fdp
+                    Whether you want to heal the neuron or not. N.B. Navis neurons
+                    should be healed on import, i.e. navis.fetch_skeletons(bodyid, heal = True)
+                    see navis.fetch_skeletons and navis.heal_fragmented_neuron for more details
+
+    plot_nodes:           bool
+
+                    Whether treenodes should be plotted
+
+    plot_connectors:      bool
+
+                    Whether connectors should be plotted
+
+    highlight_connectors: dict
+
+                    A dictionary containing the treenodes of the connectors you want to highlight as keys
+                    and the colours you want to colour them as values. This allows for multiple colours to be plotted
+
+                    N.B. Plotly colours are in the range of 0 - 255 whereas matplotlib colours are between 0-1. For the
+                    interactive dendrogram colours need to be in the plotly range, whereas in the static dendrogram
+                    the colours need to be in the matplotlib range.
+
+    in_volume:            navis.Volume object
+
+                    A navis.Volume object corresponding to an ROI in the brain. This will then highlight the nodes of
+                    the neuron which are in that volume
+
+
+    prog:                 str
+
+                    The layout type used by navis.nx_agraph.graphviz_layout()
+                    Valid programs include [dot, neato or fdp].
+                    The dot program provides a hierarchical layout, this is the fastest program
+                    The neato program creates edges between nodes proportional to their real length.
+                    The neato program takes the longest amount of time, can be ~2hrs for a single neuron!
+
+    inscreen:             bool
+
+                    Whether to plot the graph inscreen (juptyer notebooks) or to plot it as a
+                    separate HTML file that can be saved to file, opened in the browser and opened any time
+
+    filename:             str
+
+                    The filename of your interactive dendrogram html file. This parameter is only appropriate
+                    when inscreen = False.
+
+
 
     Returns
     -------
-    graph : skeleton nodes as graph nodes with links between them as edges
-    positions : a dictionary of the positions on the 2D plane of each node
+    plotly.fig object containing the dendrogram - this can be either inscreen or as a separate html file
+    with the filename specified by the filename parameter
+
 
     Examples
     --------
+    from neuroboom.utils import create_graph_structure
+    from neuroboom.dendrogram import interactive_dendrogram
+    import navis.interfaces.neuprint as nvneu
+    from matplotlib import pyplot as plt
+
+
+    test_neuron = nvneu.fetch_skeletons(722817260)
+
+
+    interactive_dendrogram(test_neuron, prog = 'dot', inscreen = True)
+
+
     """
-    
-    if not isinstance(z, (navis.TreeNeuron, navis.neuronlist.NeuronList)):
-        raise ValueError('Need to pass a Navis Tree Neuron type')
-    elif isinstance(z, navis.neuronlist.NeuronList):
-        if len(z) > 1:
-            raise ValueError('Need to pass a SINGLE Neuron')
-        else:
-            z = z[0]
+
+    z = check_valid_neuron_input(z)
 
     if heal_neuron:
         z = navis.heal_fragmented_neuron(z)
