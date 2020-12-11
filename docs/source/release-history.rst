@@ -2,12 +2,14 @@
 Release History
 ===============
 
+v0.1.7 (2020-12-11)
+* upload fix 3
+
 v0.1.6 (2020-12-11)
 * upload fix 2
 
 v0.1.5 (2020-12-11)
 * upload fix
-
 
 v0.1.4 (2020-12-11)
 * functions in dendrogram.py, connectivity.py, morphoelectric.py, utils.py, stats.py tidied using typing module
