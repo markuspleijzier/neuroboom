@@ -7,8 +7,6 @@ import navis
 
 # Create an adjacency matrix from synapse connections (neuprint)
 
-
-
 def adjx_from_syn_conn(
     x: List[int],
     presyn_postsyn: str = 'pre',
