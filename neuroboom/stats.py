@@ -1,7 +1,6 @@
 # INSERT LICENSE
 
 # This script contains statistical functions
-
 import navis
 from collections import Counter
 import pandas as pd
@@ -11,6 +10,7 @@ from tqdm import tqdm
 import copy
 import random
 import navis.interfaces.neuprint as nvneu
+from typing import Tuple, Optional, List, Union
 
 
 def presynapse_focality(

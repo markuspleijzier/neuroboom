@@ -1,14 +1,12 @@
 # INSERT LICENSE
-
-
 # This script contains utility functions
-
 # Importing dependencies
 
 import navis
 import numpy as np
 import networkx as nx
 import pymaid
+from typing import Tuple, Optional, List, Union
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
 
@@ -198,6 +196,3 @@ def pymaid_topological_sort(
     navis_neuron.name = x.neuron_name
 
     return(navis_neuron)
-
-
-    

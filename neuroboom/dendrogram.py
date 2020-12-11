@@ -16,49 +16,6 @@ from plotly.offline import plot, iplot
 # from logging import
 # This script contains functions for plotting dendrograms, static and interactive
 
-# dendro
-
-VALID_PROGS = ["fdp", "dot", "neato"]
-
-
-# def plot_dendrogram(
-#     x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
-#     heal_neuron: bool = True,
-#     downsample_neuron: float = 0.0,
-#     plot_connectors: bool = True,
-#     connector_confidence: Tuple[float, float] = (0.0, 0.0),
-#     highlight_connectors: Optional = None,
-#     fragment: bool = False,
-#     presyn_color: List[List[float]] = [[0.9, 0.0, 0.0]],
-#     postsyn_color: List[List[float]] = [[0.0, 0.0, 0.9]],
-#     highlight_connector_color: List[List[float]] = [[0.0, 0.9, 0.0]],
-#     highlight_connector_size: int = 20,
-#     presyn_size: float = 0.1,
-#     postsyn_size: float = 0.1,
-#     prog: str = "dot",
-# ) -> None:
-#
-#     # Typing & Input sanity checking
-#     x = check_valid_neuron_input(x)
-#
-#     assert isinstance(
-#         connector_confidence, tuple
-#     ), f"Need to pass a tuple for confidence values. You have passed: {connector_confidence}"
-#     assert (
-#         len(connector_confidence) == 2
-#     ), """Need to pass a tuple containing two values for confidence. \n
-#            The first value is the confidence threshold for presynapses. \n
-#           The second value is the confidence threshold for postsynapses
-#        """
-#
-#     assert (
-#         prog in VALID_PROGS
-#     ), f"Unknown program parameter!. Please specify one of: {VALID_PROGS}"
-# =======
-
-# This script contains functions for plotting dendrograms, static and interactive
-# Create Graph Structure
-
 def create_graph_structure(
     x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
     returned_object: str = 'graph',

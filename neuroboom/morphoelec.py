@@ -17,6 +17,8 @@ from collections import Counter
 import scipy.sparse as sparse
 from scipy.sparse.linalg import spsolve
 
+from typing import Tuple, Optional, List, Union
+
 # Contains functions to model steady state passive electrotonic properties of neurons
 def prepare_neuron(
     x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList,
@@ -407,4 +409,3 @@ def cluster_palette(
     label_to_col[-1] = (0.0, 0.0, 0.0)
 
     return(label_to_col)
-    

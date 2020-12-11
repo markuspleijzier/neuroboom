@@ -1,4 +1,5 @@
 # INSERT LICENSE
+from typing import Tuple, Optional, List, Union
 import navis.interfaces.neuprint as nvneu
 from collections import Counter
 import pandas as pd
