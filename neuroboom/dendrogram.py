@@ -15,10 +15,12 @@ from plotly.offline import plot, iplot
 # from logging import
 # This script contains functions for plotting dendrograms, static and interactive
 
+
 def create_graph_structure(
     x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
-    returned_object: str = 'graph',
-    prog: str = 'dot'):
+    returned_object: str = "graph",
+    prog: str = "dot",
+):
 
     """
     Takes a navis neuron and creates a graph layout
@@ -42,43 +44,51 @@ def create_graph_structure(
 
     x = check_valid_neuron_input(x)
 
-    valid_objects = ['graph', 'positions', 'graph_and_positions']
+    valid_objects = ["graph", "positions", "graph_and_positions"]
 
-    assert isinstance(returned_object, str), f"You need to pass a string for the returned object. You have passed: {returned_object}"
+    assert isinstance(
+        returned_object, str
+    ), f"You need to pass a string for the returned object. You have passed: {returned_object}"
 
-    assert (returned_object in valid_objects), f"You need to pass a valid object to return. These include: {valid_objects}"
+    assert (
+        returned_object in valid_objects
+    ), f"You need to pass a valid object to return. These include: {valid_objects}"
 
-    valid_progs = ['fdp' ,'dot', 'neato']
+    valid_progs = ["fdp", "dot", "neato"]
 
-    assert (prog in valid_progs), f"Invalid program parameter. You need to pass one of {valid_progs}"
+    assert (
+        prog in valid_progs
+    ), f"Invalid program parameter. You need to pass one of {valid_progs}"
 
-    print('Creating Graph Structure...')
+    print("Creating Graph Structure...")
 
     g = nx.DiGraph()
     g.add_nodes_from(x.nodes.node_id)
-    for e in x.nodes[['node_id', 'parent_id', 'parent_dist']].values:
+    for e in x.nodes[["node_id", "parent_id", "parent_dist"]].values:
         # Skip root node
         if e[1] == -1:
             continue
         g.add_edge(int(e[0]), int(e[1]), len=e[2])
 
-    if returned_object == 'graph':
-        print('Returning graph only')
-        return(g)
+    if returned_object == "graph":
+        print("Returning graph only")
+        return g
 
-    elif returned_object == 'positions':
-        print('Calculating layout...')
+    elif returned_object == "positions":
+        print("Calculating layout...")
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
-        print('Returning positions only')
-        return(pos)
+        print("Returning positions only")
+        return pos
 
-    elif returned_object == 'graph_and_positions':
-        print('Calculating layout...')
+    elif returned_object == "graph_and_positions":
+        print("Calculating layout...")
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
-        print('Returning graph and positions')
-        return(g, pos)
+        print("Returning graph and positions")
+        return (g, pos)
+
 
 # dendrogram
+
 
 def plot_dendrogram(
     x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
@@ -88,13 +98,14 @@ def plot_dendrogram(
     connector_confidence: Tuple[float, float] = (0.0, 0.0),
     highlight_connectors: Optional = None,
     fragment: bool = False,
-    presyn_color: List[List[float]] = [[.9, .0, .0]],
-    postsyn_color: List[List[float]] = [[.0, .0, .9]],
-    highlight_connector_color: List[List[float]] = [[.0, .9, .0]],
+    presyn_color: List[List[float]] = [[0.9, 0.0, 0.0]],
+    postsyn_color: List[List[float]] = [[0.0, 0.0, 0.9]],
+    highlight_connector_color: List[List[float]] = [[0.0, 0.9, 0.0]],
     highlight_connector_size: int = 20,
-    presyn_size: float = .1,
-    postsyn_size: float = .1,
-    prog: str = 'dot'):
+    presyn_size: float = 0.1,
+    postsyn_size: float = 0.1,
+    prog: str = "dot",
+):
 
     """
     This function creates a 2-dimensional dendrogram, a 'flattened' version of a neuron.
@@ -204,8 +215,7 @@ def plot_dendrogram(
     x = check_valid_neuron_input(x)
 
     assert isinstance(
-        connector_confidence,
-        tuple
+        connector_confidence, tuple
     ), f"Need to pass a tuple for confidence values. You have passed a {type(connector_confidence)}"
 
     assert (
@@ -215,98 +225,161 @@ def plot_dendrogram(
     The first value is the confidence threshold for presynapses. \n
     The second value is the confidence threshold for postsynapses. """
 
-    valid_progs = ['fdp','dot','neato']
+    valid_progs = ["fdp", "dot", "neato"]
 
-    assert (prog in valid_progs), f"Invalid program parameter. You need to pass one of {valid_progs}"
+    assert (
+        prog in valid_progs
+    ), f"Invalid program parameter. You need to pass one of {valid_progs}"
 
     start = time.time()
 
     if heal_neuron:
-        print('Healing Neuron...')
-        navis.heal_fragmented_neuron(x, inplace = True)
+        print("Healing Neuron...")
+        navis.heal_fragmented_neuron(x, inplace=True)
 
     if any(connector_confidence) > 0.0:
-        print('''Thresholding synapses: only considering
-        presynapses above {} confidence and postsynapses above {}'''.format(connector_confidence[0], connector_confidence[1]))
-        presyn_included = x.connectors[x.connectors.type == 'pre'][x.connectors.confidence > connector_confidence[0]].connector_id.tolist()
-        postsyn_included = x.connectors[x.connectors.type == 'post'][x.connectors.confidence > connector_confidence[1]].connector_id.tolist()
-        connectors_included = list(chain.from_iterable([presyn_included, postsyn_included]))
+        print(
+            """Thresholding synapses: only considering
+        presynapses above {} confidence and postsynapses above {}""".format(
+                connector_confidence[0], connector_confidence[1]
+            )
+        )
+        presyn_included = x.connectors[x.connectors.type == "pre"][
+            x.connectors.confidence > connector_confidence[0]
+        ].connector_id.tolist()
+        postsyn_included = x.connectors[x.connectors.type == "post"][
+            x.connectors.confidence > connector_confidence[1]
+        ].connector_id.tolist()
+        connectors_included = list(
+            chain.from_iterable([presyn_included, postsyn_included])
+        )
         x.connectors = x.connectors[x.connectors.connector_id.isin(connectors_included)]
 
-
     if downsample_neuron > 0:
-        print('Downsampling neuron, factor = {}'.format(downsample_neuron))
-        x = navis.downsample_neuron(x, downsampling_factor=downsample_neuron,
-                                    preserve_nodes = x.connectors.node_id.unique().tolist())
+        print("Downsampling neuron, factor = {}".format(downsample_neuron))
+        x = navis.downsample_neuron(
+            x,
+            downsampling_factor=downsample_neuron,
+            preserve_nodes=x.connectors.node_id.unique().tolist(),
+        )
 
-    if 'parent_dist' not in x.nodes:
-        print('Calculating cable length...')
-        x = calc_cable(x, return_skdata = True)
+    if "parent_dist" not in x.nodes:
+        print("Calculating cable length...")
+        x = calc_cable(x, return_skdata=True)
 
-    g, pos = create_graph_structure(x, returned_object = 'graph_and_positions', prog = prog)
+    g, pos = create_graph_structure(x, returned_object="graph_and_positions", prog=prog)
 
-    #Plotting tree with the above layout
-    print('Plotting Tree...')
-    nx.draw(g, pos, node_size = 0, arrows = False, width = .25)
+    # Plotting tree with the above layout
+    print("Plotting Tree...")
+    nx.draw(g, pos, node_size=0, arrows=False, width=0.25)
 
     # Whether to add soma or not
     if not fragment:
-        print('Plotting soma')
-        plt.scatter([pos[x.soma][0]], [pos[x.soma][1]], s = 80, c = [[0, 0, 0]], zorder = 1)
+        print("Plotting soma")
+        plt.scatter([pos[x.soma][0]], [pos[x.soma][1]], s=80, c=[[0, 0, 0]], zorder=1)
 
     if plot_connectors:
-        print('Plotting connectors...')
+        print("Plotting connectors...")
         plt.scatter(
-
-            [pos[tn][0] for tn in x.connectors[x.connectors.type == 'pre'].node_id.values ],
-            [pos[tn][1] for tn in x.connectors[x.connectors.type == 'pre'].node_id.values ],
-            c = presyn_color,
-            zorder = 2,
-            s = presyn_size, linewidths = 1 )
+            [
+                pos[tn][0]
+                for tn in x.connectors[x.connectors.type == "pre"].node_id.values
+            ],
+            [
+                pos[tn][1]
+                for tn in x.connectors[x.connectors.type == "pre"].node_id.values
+            ],
+            c=presyn_color,
+            zorder=2,
+            s=presyn_size,
+            linewidths=1,
+        )
 
         plt.scatter(
-
-            [pos[tn][0] for tn in x.connectors[x.connectors.type == 'post'].node_id.values ],
-            [pos[tn][1] for tn in x.connectors[x.connectors.type == 'post'].node_id.values ],
-            c = postsyn_color,
-            zorder = 2,
-            s = postsyn_size, linewidths = 1 )
-
+            [
+                pos[tn][0]
+                for tn in x.connectors[x.connectors.type == "post"].node_id.values
+            ],
+            [
+                pos[tn][1]
+                for tn in x.connectors[x.connectors.type == "post"].node_id.values
+            ],
+            c=postsyn_color,
+            zorder=2,
+            s=postsyn_size,
+            linewidths=1,
+        )
 
     if highlight_connectors != None:
 
-        if isinstance( highlight_connectors, (list, np.ndarray) ):
-            hl_cn_coords = np.array([ pos[tn] for tn in x.connectors[ x.connectors.connector_id.isin( highlight_connectors )].node_id ])
-            plt.scatter( hl_cn_coords[:, 0], hl_cn_coords[:, 1], s = highlight_connector_size,
-                        c = highlight_connector_color, zorder = 3, linewidths = 1)
+        if isinstance(highlight_connectors, (list, np.ndarray)):
+            hl_cn_coords = np.array(
+                [
+                    pos[tn]
+                    for tn in x.connectors[
+                        x.connectors.connector_id.isin(highlight_connectors)
+                    ].node_id
+                ]
+            )
+            plt.scatter(
+                hl_cn_coords[:, 0],
+                hl_cn_coords[:, 1],
+                s=highlight_connector_size,
+                c=highlight_connector_color,
+                zorder=3,
+                linewidths=1,
+            )
 
-        elif isinstance( highlight_connectors, dict):
+        elif isinstance(highlight_connectors, dict):
             for cn in highlight_connectors:
                 if cn in highlight_connectors:
                     if cn == None:
                         continue
                     if cn not in x.connectors.connector_id.values:
-                        print('Connector {} is not present in the neuron / neuron fragment'.format(cn))
-                    hl_cn_coords = np.array([ pos[tn] for tn in x.connectors[ x.connectors.connector_id == cn].node_id ])
-                    plt.scatter( hl_cn_coords[:, 0], hl_cn_coords[:, 1], s = highlight_connector_size, color = highlight_connectors[cn], zorder = 3)
+                        print(
+                            "Connector {} is not present in the neuron / neuron fragment".format(
+                                cn
+                            )
+                        )
+                    hl_cn_coords = np.array(
+                        [
+                            pos[tn]
+                            for tn in x.connectors[
+                                x.connectors.connector_id == cn
+                            ].node_id
+                        ]
+                    )
+                    plt.scatter(
+                        hl_cn_coords[:, 0],
+                        hl_cn_coords[:, 1],
+                        s=highlight_connector_size,
+                        color=highlight_connectors[cn],
+                        zorder=3,
+                    )
 
         else:
 
-            raise TypeError('Unable to highlight connectors from data of type {}'.format(type(highlight_connectors)))
+            raise TypeError(
+                "Unable to highlight connectors from data of type {}".format(
+                    type(highlight_connectors)
+                )
+            )
 
-    print('Completed in %is' % int(time.time() - start))
+    print("Completed in %is" % int(time.time() - start))
 
 
 # Plot an interactive dendrogram
-def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
-                           heal_neuron: bool = True,
-                           plot_nodes: bool = True,
-                           plot_connectors: bool = True,
-                           highlight_connectors: Optional = None,
-                           in_volume: Optional = None,
-                           prog: str = 'dot',
-                           inscreen: bool = True,
-                           filename: Optional = None):
+def interactive_dendrogram(
+    z: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    heal_neuron: bool = True,
+    plot_nodes: bool = True,
+    plot_connectors: bool = True,
+    highlight_connectors: Optional = None,
+    in_volume: Optional = None,
+    prog: str = "dot",
+    inscreen: bool = True,
+    filename: Optional = None,
+):
 
     """
     Takes a navis neuron and returns an interactive 2D dendrogram.
@@ -393,27 +466,27 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
     if heal_neuron:
         z = navis.heal_fragmented_neuron(z)
 
-    valid_progs = ['neato','dot']
+    valid_progs = ["neato", "dot"]
     if prog not in valid_progs:
-        raise ValueError('Unknown program parameter!')
+        raise ValueError("Unknown program parameter!")
 
-    #save start time
+    # save start time
 
     start = time.time()
 
-    #Necessary for neato layouts for preservation of segment lengths
+    # Necessary for neato layouts for preservation of segment lengths
 
-    if 'parent_dist' not in z.nodes:
-        z = calc_cable(z, return_skdata = True)
+    if "parent_dist" not in z.nodes:
+        z = calc_cable(z, return_skdata=True)
 
-    #Generation of networkx diagram
+    # Generation of networkx diagram
 
-    g, pos = create_graph_structure(z, returned_object = 'graph_and_positions', prog = prog)
+    g, pos = create_graph_structure(z, returned_object="graph_and_positions", prog=prog)
 
-    print('Now creating plotly graph...')
+    print("Now creating plotly graph...")
 
-    #Convering networkx nodes for plotly
-    #NODES
+    # Convering networkx nodes for plotly
+    # NODES
 
     x = []
     y = []
@@ -428,13 +501,19 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
             y.append(y_)
             node_info.append("Node ID: {}".format(n))
 
-        node_trace = go.Scatter(x = x, y = y, mode = 'markers', text = node_info,
-                            hoverinfo = 'text', marker = go.scatter.Marker(showscale=False))
+        node_trace = go.Scatter(
+            x=x,
+            y=y,
+            mode="markers",
+            text=node_info,
+            hoverinfo="text",
+            marker=go.scatter.Marker(showscale=False),
+        )
     else:
 
         node_trace = go.Scatter()
 
-    #EDGES
+    # EDGES
 
     xe = []
     ye = []
@@ -447,11 +526,15 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
         xe += [x0, x1, None]
         ye += [y0, y1, None]
 
-    edge_trace = go.Scatter(x = xe, y = ye,
-                            line = go.scatter.Line(width = 1.0, color = '#000'),
-                            hoverinfo = 'none', mode = 'lines')
+    edge_trace = go.Scatter(
+        x=xe,
+        y=ye,
+        line=go.scatter.Line(width=1.0, color="#000"),
+        hoverinfo="none",
+        mode="lines",
+    )
 
-    #SOMA
+    # SOMA
 
     xs = []
     ys = []
@@ -469,14 +552,17 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
             break
 
-    soma_trace = go.Scatter(x = xs, y = ys,
-                            mode = 'markers',
-                            hoverinfo = 'text',
-                            marker = dict(size = 20, color = 'rgb(0,0,0)'),
-                            text = 'Soma, node:{}'.format(z.soma))
+    soma_trace = go.Scatter(
+        x=xs,
+        y=ys,
+        mode="markers",
+        hoverinfo="text",
+        marker=dict(size=20, color="rgb(0,0,0)"),
+        text="Soma, node:{}".format(z.soma),
+    )
 
-    #CONNECTORS:
-    #RELATION  = 0 ARE PRESYNAPSES, RELATION = 1 ARE POSTSYNAPSES
+    # CONNECTORS:
+    # RELATION  = 0 ARE PRESYNAPSES, RELATION = 1 ARE POSTSYNAPSES
 
     if plot_connectors == False:
 
@@ -486,8 +572,9 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
     elif plot_connectors == True:
 
-
-        presynapse_connector_list = list(z.connectors[z.connectors.type == 'pre'].node_id.values)
+        presynapse_connector_list = list(
+            z.connectors[z.connectors.type == "pre"].node_id.values
+        )
 
         x_pre = []
         y_pre = []
@@ -498,17 +585,26 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
                 if node == tn:
 
-                    x,y = pos[node]
+                    x, y = pos[node]
 
                     x_pre.append(x)
                     y_pre.append(y)
-                    presynapse_connector_info.append("Presynapse, connector_id: {}".format(tn))
+                    presynapse_connector_info.append(
+                        "Presynapse, connector_id: {}".format(tn)
+                    )
 
-        presynapse_connector_trace = go.Scatter(x = x_pre, y = y_pre,
-                                            text = presynapse_connector_info, mode = 'markers', hoverinfo = 'text',
-                                            marker = dict(size = 10, color = 'rgb(0,255,0)'))
+        presynapse_connector_trace = go.Scatter(
+            x=x_pre,
+            y=y_pre,
+            text=presynapse_connector_info,
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(size=10, color="rgb(0,255,0)"),
+        )
 
-        postsynapse_connectors_list = list(z.connectors[z.connectors.type =='post'].node_id.values)
+        postsynapse_connectors_list = list(
+            z.connectors[z.connectors.type == "post"].node_id.values
+        )
 
         x_post = []
         y_post = []
@@ -519,17 +615,23 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
                 if node == tn:
 
-                    x,y = pos[node]
+                    x, y = pos[node]
 
                     x_post.append(x)
                     y_post.append(y)
 
-                    postsynapse_connector_info.append("Postsynapse, connector id: {}".format(tn))
+                    postsynapse_connector_info.append(
+                        "Postsynapse, connector id: {}".format(tn)
+                    )
 
-        postsynapse_connector_trace = go.Scatter(x = x_post, y = y_post,
-                                             text = postsynapse_connector_info, mode = 'markers', hoverinfo = 'text',
-                                             marker = dict(size = 10, color = 'rgb(0,0,255)'))
-
+        postsynapse_connector_trace = go.Scatter(
+            x=x_post,
+            y=y_post,
+            text=postsynapse_connector_info,
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(size=10, color="rgb(0,0,255)"),
+        )
 
     if highlight_connectors == None:
 
@@ -542,14 +644,21 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
         for i in list(highlight_connectors.keys()):
 
-            HC_nodes.append(z.connectors[z.connectors.connector_id == i].node_id.values[0])
-            HC_color.append("rgb({}, {}, {})".format(int(highlight_connectors[i][0]), int(highlight_connectors[i][1]), int(highlight_connectors[i][2])))
+            HC_nodes.append(
+                z.connectors[z.connectors.connector_id == i].node_id.values[0]
+            )
+            HC_color.append(
+                "rgb({}, {}, {})".format(
+                    int(highlight_connectors[i][0]),
+                    int(highlight_connectors[i][1]),
+                    int(highlight_connectors[i][2]),
+                )
+            )
 
             HC_x = []
             HC_y = []
 
             HC_info = []
-
 
             for node in g.nodes():
 
@@ -562,12 +671,23 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
                         HC_x.append(x)
                         HC_y.append(y)
 
-                        HC_info.append('Connector of Interest, connector_id: {}, treenode_id: {}'.format(z.connectors[z.connectors.node_id == node].connector_id.values[0], node))
+                        HC_info.append(
+                            "Connector of Interest, connector_id: {}, treenode_id: {}".format(
+                                z.connectors[
+                                    z.connectors.node_id == node
+                                ].connector_id.values[0],
+                                node,
+                            )
+                        )
 
-            HC_trace = go.Scatter(x = HC_x, y = HC_y, text = HC_info,
-                                  mode = 'markers', hoverinfo = 'text',
-                                  marker = dict(size = 12.5, color = HC_color))
-
+            HC_trace = go.Scatter(
+                x=HC_x,
+                y=HC_y,
+                text=HC_info,
+                mode="markers",
+                hoverinfo="text",
+                marker=dict(size=12.5, color=HC_color),
+            )
 
     ##Highlight the nodes that are in a particular volume
 
@@ -577,10 +697,10 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
     elif in_volume != None:
 
-        #Volume of interest
+        # Volume of interest
 
-        res = navis.in_volume(z.nodes, volume = in_volume, mode = "IN")
-        z.nodes['IN_VOLUME'] = res
+        res = navis.in_volume(z.nodes, volume=in_volume, mode="IN")
+        z.nodes["IN_VOLUME"] = res
 
         x_VOI = []
         y_VOI = []
@@ -593,33 +713,52 @@ def interactive_dendrogram(z: Union[navis.TreeNeuron, navis.neuronlist.NeuronLis
 
                 if nodes == tn:
 
-                    x,y = pos[tn]
+                    x, y = pos[tn]
 
                     x_VOI.append(x)
                     y_VOI.append(y)
 
                     VOI_info.append("Treenode {} is in {} volume".format(tn, in_volume))
 
-        in_volume_trace = go.Scatter(x = x_VOI, y = y_VOI,
-                                     text = VOI_info, mode = 'markers', hoverinfo = 'text',
-                                     marker = dict(size = 5, color = 'rgb(35,119,0)'))
-
+        in_volume_trace = go.Scatter(
+            x=x_VOI,
+            y=y_VOI,
+            text=VOI_info,
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(size=5, color="rgb(35,119,0)"),
+        )
 
     print("Creating Plotly Graph")
 
-    fig = go.Figure(data = [edge_trace, node_trace, soma_trace,
-                                 presynapse_connector_trace, postsynapse_connector_trace, HC_trace, in_volume_trace],
-                    layout = go.Layout(title = "Plotly graph of {} with {} layout".format(z.name, prog),
-                                       titlefont = dict(size = 16),
-                                       showlegend = False,
-                                       hovermode = 'closest', margin = dict(b = 20, l = 50, r = 5, t = 40), annotations= [dict(showarrow = False, xref = 'paper', yref = 'paper', x = 0.005, y = -0.002)],
-                                       xaxis = go.layout.XAxis(showgrid = False, zeroline = False, showticklabels = False),
-                                       yaxis = go.layout.YAxis(showgrid = False, zeroline = False, showticklabels = False)))
+    fig = go.Figure(
+        data=[
+            edge_trace,
+            node_trace,
+            soma_trace,
+            presynapse_connector_trace,
+            postsynapse_connector_trace,
+            HC_trace,
+            in_volume_trace,
+        ],
+        layout=go.Layout(
+            title="Plotly graph of {} with {} layout".format(z.name, prog),
+            titlefont=dict(size=16),
+            showlegend=False,
+            hovermode="closest",
+            margin=dict(b=20, l=50, r=5, t=40),
+            annotations=[
+                dict(showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)
+            ],
+            xaxis=go.layout.XAxis(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=go.layout.YAxis(showgrid=False, zeroline=False, showticklabels=False),
+        ),
+    )
 
     if inscreen == True:
 
-        return(iplot(fig))
+        return iplot(fig)
 
     else:
 
-        return(plot(fig, filename = filename))
+        return plot(fig, filename=filename)

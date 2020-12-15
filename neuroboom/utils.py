@@ -161,9 +161,7 @@ def pymaid_topological_sort(
 
     Examples
     --------
-
-
-
+    
     """
 
     x = check_valid_pymaid_input(x)

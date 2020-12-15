@@ -5,8 +5,8 @@ import numpy as np
 import time
 import scprep
 import phate
-import sklearn.decomposition # PCA
-import sklearn.manifold # t-SNE
+import sklearn.decomposition  # PCA
+import sklearn.manifold  # t-SNE
 
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
@@ -21,10 +21,15 @@ from typing import Tuple, Optional, List, Union
 
 # Contains functions to model steady state passive electrotonic properties of neurons
 def prepare_neuron(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList,
-             pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
+    x: Union[
+        navis.TreeNeuron,
+        navis.neuronlist.NeuronList,
+        pymaid.core.CatmaidNeuron,
+        pymaid.core.CatmaidNeuronList,
+    ],
     change_units: bool = True,
-    factor: int = 1e3):
+    factor: int = 1e3,
+):
 
     """
     Takes a navis or pymaid neuron and prepares it for electrotonic modelling
@@ -55,68 +60,77 @@ def prepare_neuron(
 
     if check_valid_neuron_input(x):
 
-        node_sort = dict([(i, k) for i, k in zip(range(len(x.nodes)), navis.node_label_sorting(x))])
-        node_sort_rev = {i : j for j, i in node_sort.items()}
-        navis.downsample_neuron(x, downsampling_factor = float('inf'), inplace = True)
-        x.nodes['rank'] = x.nodes.node_id.map(node_sort_rev).tolist()
-        x.nodes.sort_values(by = ['rank'], ascending = True, inplace = True)
-        x.nodes.reset_index(drop = True, inplace = True)
+        node_sort = dict(
+            [(i, k) for i, k in zip(range(len(x.nodes)), navis.node_label_sorting(x))]
+        )
+        node_sort_rev = {i: j for j, i in node_sort.items()}
+        navis.downsample_neuron(x, downsampling_factor=float("inf"), inplace=True)
+        x.nodes["rank"] = x.nodes.node_id.map(node_sort_rev).tolist()
+        x.nodes.sort_values(by=["rank"], ascending=True, inplace=True)
+        x.nodes.reset_index(drop=True, inplace=True)
 
         x = calc_cable(x, return_skdata=True)
 
         if not change_units:
 
-            return(x)
+            return x
 
         else:
 
-            x.nodes['x'] = x.nodes['x'] / factor
-            x.nodes['y'] = x.nodes['y'] / factor
-            x.nodes['z'] = x.nodes['z'] / factor
-            x.nodes['radius'] = x.nodes['radius'] / factor
-            x.nodes['parent_dist'] = x.nodes['parent_dist'] / factor
+            x.nodes["x"] = x.nodes["x"] / factor
+            x.nodes["y"] = x.nodes["y"] / factor
+            x.nodes["z"] = x.nodes["z"] / factor
+            x.nodes["radius"] = x.nodes["radius"] / factor
+            x.nodes["parent_dist"] = x.nodes["parent_dist"] / factor
 
-            return(x)
-
+            return x
 
     elif check_valid_pymaid_input(x):
 
-        node_sort = dict([(i, k) for i, k in zip(range(len(x.nodes)), pymaid.node_label_sorting(x))])
-        node_sort_rev = {i : j for j, i in node_sort.items()}
-        x = pymaid.downsample_neuron(x, resampling_factor = float('inf'))
+        node_sort = dict(
+            [(i, k) for i, k in zip(range(len(x.nodes)), pymaid.node_label_sorting(x))]
+        )
+        node_sort_rev = {i: j for j, i in node_sort.items()}
+        x = pymaid.downsample_neuron(x, resampling_factor=float("inf"))
         x = pymaid.guess_radius(x)
 
-        x.nodes['rank'] = x.nodes.treenode_id.map(node_sort_rev).tolist()
-        x.nodes.sort_values(by = ['rank'], ascending = True, inplace = True)
-        x.nodes.reset_index(drop = True, inplace = True)
+        x.nodes["rank"] = x.nodes.treenode_id.map(node_sort_rev).tolist()
+        x.nodes.sort_values(by=["rank"], ascending=True, inplace=True)
+        x.nodes.reset_index(drop=True, inplace=True)
 
         x = pymaid.calc_cable(x, return_skdata=True)
 
         if not change_units:
 
-            return(x)
+            return x
 
         else:
 
-            x.nodes['x'] = x.nodes['x'] / factor
-            x.nodes['y'] = x.nodes['y'] / factor
-            x.nodes['z'] = x.nodes['z'] / factor
-            x.nodes['radius'] = x.nodes['radius'] / factor
-            x.nodes['parent_dist'] = x.nodes['parent_dist'] / factor
+            x.nodes["x"] = x.nodes["x"] / factor
+            x.nodes["y"] = x.nodes["y"] / factor
+            x.nodes["z"] = x.nodes["z"] / factor
+            x.nodes["radius"] = x.nodes["radius"] / factor
+            x.nodes["parent_dist"] = x.nodes["parent_dist"] / factor
 
-            return(x)
+            return x
 
     else:
 
-        raise ValueError('Need to pass either a Navis or a Catmaid neuron type!')
+        raise ValueError("Need to pass either a Navis or a Catmaid neuron type!")
+
 
 def calculate_M_mat(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList,
-             pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
+    x: Union[
+        navis.TreeNeuron,
+        navis.neuronlist.NeuronList,
+        pymaid.core.CatmaidNeuron,
+        pymaid.core.CatmaidNeuronList,
+    ],
     Ra: float = 266.1,
     Rm: float = 20.8,
     Cm: float = 0.8,
-    solve: bool = False):
+    solve: bool = False,
+):
 
     """
     Calculates the conductance matrix for a given neuron
@@ -171,17 +185,24 @@ def calculate_M_mat(
             aind = int(x.nodes.node_id[i])
             bind = int(x.nodes.parent_id[i])
 
-            axyz = x.nodes[x.nodes.node_id == aind][['x','y','z']].values
-            bxyz = x.nodes[x.nodes.node_id == bind][['x','y','z']].values
+            axyz = x.nodes[x.nodes.node_id == aind][["x", "y", "z"]].values
+            bxyz = x.nodes[x.nodes.node_id == bind][["x", "y", "z"]].values
 
             complength[i] = np.sqrt(np.sum((axyz - bxyz) ** 2))
 
-            meandiam = (x.nodes[x.nodes.node_id == aind].radius.values + x.nodes[x.nodes.node_id == bind].radius.values) * .5
+            meandiam = (
+                x.nodes[x.nodes.node_id == aind].radius.values
+                + x.nodes[x.nodes.node_id == bind].radius.values
+            ) * 0.5
 
             area = (meandiam ** 2) / (4.0 * np.pi)
 
-            M[ tn_to_index[bind], tn_to_index[aind]] = -area / complength[i] / Ra * 10**(-4)
-            M[ tn_to_index[aind], tn_to_index[bind]] = M[ tn_to_index[bind], tn_to_index[aind]]
+            M[tn_to_index[bind], tn_to_index[aind]] = (
+                -area / complength[i] / Ra * 10 ** (-4)
+            )
+            M[tn_to_index[aind], tn_to_index[bind]] = M[
+                tn_to_index[bind], tn_to_index[aind]
+            ]
 
         complength[0] = complength[1]
 
@@ -197,9 +218,9 @@ def calculate_M_mat(
 
             M_solved = np.linalg.inv(sparse.csr_matrix.todense(M))
 
-            return(M_solved, memcap)
+            return (M_solved, memcap)
 
-        return(M, memcap)
+        return (M, memcap)
 
     elif check_valid_pymaid_input(x):
 
@@ -217,22 +238,29 @@ def calculate_M_mat(
             aind = int(x.nodes.treenode_id[i])
             bind = int(x.nodes.parent_id[i])
 
-            axyz = x.nodes[x.nodes.treenode_id == aind][['x','y','z']].values
-            bxyz = x.nodes[x.nodes.treenode_id == bind][['x','y','z']].values
+            axyz = x.nodes[x.nodes.treenode_id == aind][["x", "y", "z"]].values
+            bxyz = x.nodes[x.nodes.treenode_id == bind][["x", "y", "z"]].values
 
             complength[i] = np.sqrt(np.sum((axyz - bxyz) ** 2))
 
-            meandiam = (x.nodes[x.nodes.treenode_id == aind].radius.values + x.nodes[x.nodes.treenode_id == bind].radius.values) * .5
+            meandiam = (
+                x.nodes[x.nodes.treenode_id == aind].radius.values
+                + x.nodes[x.nodes.treenode_id == bind].radius.values
+            ) * 0.5
 
             area = (meandiam ** 2) / (4.0 * np.pi)
 
-            M[ tn_to_index[bind], tn_to_index[aind]] = -area / complength[i] / Ra*10**(-4)
-            M[ tn_to_index[aind], tn_to_index[bind]] = M[ tn_to_index[bind], tn_to_index[aind]]
+            M[tn_to_index[bind], tn_to_index[aind]] = (
+                -area / complength[i] / Ra * 10 ** (-4)
+            )
+            M[tn_to_index[aind], tn_to_index[bind]] = M[
+                tn_to_index[bind], tn_to_index[aind]
+            ]
 
         complength[0] = complength[1]
 
         gleak = (compdiam * np.pi * complength) / (Rm * 10 ** 8)
-        memcap = (compdiam * np.pi * complength) * Cm*(10 ** -6) / (10 ** 8)
+        memcap = (compdiam * np.pi * complength) * Cm * (10 ** -6) / (10 ** 8)
 
         for i in range(nofcomps):
             M[i, i] = gleak[i] - np.sum(M[i])
@@ -242,18 +270,16 @@ def calculate_M_mat(
         if solve:
 
             M_solved = np.linalg.inv(sparse.csr_matrix.todense(M))
-            return(M_solved, memcap)
+            return (M_solved, memcap)
 
-        return(M, memcap)
+        return (M, memcap)
 
     else:
 
-        raise ValueError('Unknown object type!')
+        raise ValueError("Unknown object type!")
 
 
-def current_injection(
-    conducM: np.mat,
-    curramp: float = 1e-11):
+def current_injection(conducM: np.mat, curramp: float = 1e-11):
 
     """
     Calculates the conductance matrix for a given neuron
@@ -290,14 +316,12 @@ def current_injection(
 
         Vm = spsolve(conducM, currinj)
 
-        Vm_mat[i,:] = Vm
+        Vm_mat[i, :] = Vm
 
-    return(Vm_mat)
+    return Vm_mat
 
-def dbs_func(
-    x,
-    eps: float = 1.0,
-    min_samples: int = 10):
+
+def dbs_func(x, eps: float = 1.0, min_samples: int = 10):
 
     """
     Parameters
@@ -321,18 +345,15 @@ def dbs_func(
 
     """
 
-    db = DBSCAN(eps = eps, min_samples = min_samples).fit(x)
+    db = DBSCAN(eps=eps, min_samples=min_samples).fit(x)
     labels = db.labels_
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
     n_noise_ = list(labels).count(-1)
 
-    return(labels, n_clusters_, n_noise_)
+    return (labels, n_clusters_, n_noise_)
 
-def find_clusters(
-    x,
-    phate_operator,
-    eps: float = 1.0,
-    min_samples: int = 10):
+
+def find_clusters(x, phate_operator, eps: float = 1.0, min_samples: int = 10):
 
     """
     Parameters
@@ -368,12 +389,10 @@ def find_clusters(
     # performing DBSCAN
     labels, n_cluster_, n_noise = dbs_func(mat_red, eps, min_samples)
 
-    return(mat_red, labels, n_clusters_, n_noise_)
+    return (mat_red, labels, n_clusters_, n_noise_)
 
-def cluster_palette(
-    cmap: str = 'hsv',
-    n_objects: int = 10,
-    shuffle: bool = False):
+
+def cluster_palette(cmap: str = "hsv", n_objects: int = 10, shuffle: bool = False):
 
     """
     Parameters
@@ -408,4 +427,4 @@ def cluster_palette(
     label_to_col = dict(zip([i for i in range(0, n_objects)], pal))
     label_to_col[-1] = (0.0, 0.0, 0.0)
 
-    return(label_to_col)
+    return label_to_col
