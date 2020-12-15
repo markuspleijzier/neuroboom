@@ -1,5 +1,5 @@
 =========
-Neuroboom
+neuroboom
 =========
 
 .. image:: https://img.shields.io/travis/markuspleijzier/neuroboom.svg
@@ -9,7 +9,7 @@ Neuroboom
         :target: https://pypi.python.org/pypi/neuroboom
 
 
-A suite of python tools for visualisation and analysis of Connectomic data
+A suite of Python3 tools for visualisation and analysis of Connectomic data
 
 * Free software: 3-clause BSD license
 * Documentation: (COMING SOON!) https://markuspleijzier.github.io/neuroboom.
