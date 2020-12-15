@@ -2,11 +2,12 @@
 # This script contains utility functions
 # Importing dependencies
 
+from typing import List, Optional, Tuple, Union
+
 import navis
-import numpy as np
 import networkx as nx
+import numpy as np
 import pymaid
-from typing import Tuple, Optional, List, Union
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
 

@@ -1,16 +1,17 @@
 # INSERT LICENSE
 
 # This script contains statistical functions
-import navis
-from collections import Counter
-import pandas as pd
-import numpy as np
-from scipy import stats
-from tqdm import tqdm
 import copy
 import random
+from collections import Counter
+from typing import List, Optional, Tuple, Union
+
+import navis
 import navis.interfaces.neuprint as nvneu
-from typing import Tuple, Optional, List, Union
+import numpy as np
+import pandas as pd
+from scipy import stats
+from tqdm import tqdm
 
 
 def presynapse_focality(

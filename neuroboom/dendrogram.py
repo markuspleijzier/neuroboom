@@ -1,16 +1,17 @@
 # INSERT LICENSE
 
 import time
-import navis
-from typing import Tuple, Optional, List, Union
-from matplotlib import pyplot as plt
-import numpy as np
-import networkx as nx
-from neuroboom.utils import calc_cable
-from neuroboom.utils import check_valid_neuron_input
 from itertools import chain
+from typing import List, Optional, Tuple, Union
+
+import navis
+import networkx as nx
+import numpy as np
 import plotly.graph_objs as go
-from plotly.offline import plot, iplot
+from matplotlib import pyplot as plt
+from plotly.offline import iplot, plot
+
+from neuroboom.utils import calc_cable, check_valid_neuron_input
 
 # from logging import
 # This script contains functions for plotting dendrograms, static and interactive

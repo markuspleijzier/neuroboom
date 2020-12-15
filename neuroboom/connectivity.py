@@ -1,9 +1,10 @@
 # INSERT LICENSE
-from typing import Tuple, Optional, List, Union
-import navis.interfaces.neuprint as nvneu
 from collections import Counter
-import pandas as pd
+from typing import List, Optional, Tuple, Union
+
 import navis
+import navis.interfaces.neuprint as nvneu
+import pandas as pd
 
 # Create an adjacency matrix from synapse connections (neuprint)
 

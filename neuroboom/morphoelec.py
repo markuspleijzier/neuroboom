@@ -1,23 +1,22 @@
 # INSERT LICENSE
 import random
-import scipy as sp
-import numpy as np
 import time
-import scprep
+from collections import Counter
+from typing import List, Optional, Tuple, Union
+
+import numpy as np
 import phate
+import scipy as sp
+import scipy.sparse as sparse
+import scprep
 import sklearn.decomposition  # PCA
 import sklearn.manifold  # t-SNE
-
-from sklearn.cluster import DBSCAN
+from scipy.sparse.linalg import spsolve
 from sklearn import metrics
+from sklearn.cluster import DBSCAN
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
-from collections import Counter
 
-import scipy.sparse as sparse
-from scipy.sparse.linalg import spsolve
-
-from typing import Tuple, Optional, List, Union
 
 # Contains functions to model steady state passive electrotonic properties of neurons
 def prepare_neuron(
