@@ -1,5 +1,3 @@
-# INSERT LICENSE
-
 import time
 from itertools import chain
 from typing import List, Optional, Tuple, Union
@@ -145,17 +143,21 @@ def plot_dendrogram(
 
     highlight_connectors: optional | np.array | dict
 
-                        If a numpy array, then this should be a numpy array of the treenodes connected to the connectors that you want to highlight.
-                        The single color and size will be specified in highlight_connector_color and highlight_connector_size
+                        If a numpy array, then this should be an array of the treenodes
+                        connected to the connectors that you want to highlight.
+                        The single color and size will be specified in
+                        highlight_connector_color and highlight_connector_size
 
-                        If a dictionary, then this should be a dictionary where the key values are treenode ids of the connectors you want to highlight
+                        If a dictionary, then the key values should be
+                        treenode ids of the connectors you want to highlight
                         and their values should be the color you want to colour them.
 
                         Passing dictionaries to this parameter allow for synapses to be coloured differently
 
     fragment:           bool
 
-                        Whether the neuron object you are passing is a fragment or not (i.e. does it have a soma or not)
+                        Whether the neuron object you are passing
+                        is a fragment or not (i.e. does it have a soma or not)
 
     presyn_color:       list
 
@@ -311,7 +313,7 @@ def plot_dendrogram(
             linewidths=1,
         )
 
-    if highlight_connectors != None:
+    if highlight_connectors is not None:
 
         if isinstance(highlight_connectors, (list, np.ndarray)):
             hl_cn_coords = np.array(
@@ -334,7 +336,7 @@ def plot_dendrogram(
         elif isinstance(highlight_connectors, dict):
             for cn in highlight_connectors:
                 if cn in highlight_connectors:
-                    if cn == None:
+                    if cn is None:
                         continue
                     if cn not in x.connectors.connector_id.values:
                         print(
@@ -407,16 +409,21 @@ def interactive_dendrogram(
 
     highlight_connectors: dict
 
-                    A dictionary containing the treenodes of the connectors you want to highlight as keys
-                    and the colours you want to colour them as values. This allows for multiple colours to be plotted
+                    A dictionary containing the treenodes of
+                    the connectors you want to highlight as keys
+                    and the colours you want to colour them as values.
+                    This allows for multiple colours to be plotted.
 
-                    N.B. Plotly colours are in the range of 0 - 255 whereas matplotlib colours are between 0-1. For the
-                    interactive dendrogram colours need to be in the plotly range, whereas in the static dendrogram
+                    N.B. Plotly colours are in the range of 0 - 255
+                    whereas matplotlib colours are between 0-1. For the
+                    interactive dendrogram colours need to be in the
+                    plotly range, whereas in the static dendrogram
                     the colours need to be in the matplotlib range.
 
     in_volume:            navis.Volume object
 
-                    A navis.Volume object corresponding to an ROI in the brain. This will then highlight the nodes of
+                    A navis.Volume object corresponding to an ROI in the brain.
+                    This will then highlight the nodes of
                     the neuron which are in that volume
 
 
@@ -565,13 +572,13 @@ def interactive_dendrogram(
     # CONNECTORS:
     # RELATION  = 0 ARE PRESYNAPSES, RELATION = 1 ARE POSTSYNAPSES
 
-    if plot_connectors == False:
+    if plot_connectors is False:
 
         presynapse_connector_trace = go.Scatter()
 
         postsynapse_connector_trace = go.Scatter()
 
-    elif plot_connectors == True:
+    elif plot_connectors is True:
 
         presynapse_connector_list = list(
             z.connectors[z.connectors.type == "pre"].node_id.values
@@ -634,7 +641,7 @@ def interactive_dendrogram(
             marker=dict(size=10, color="rgb(0,0,255)"),
         )
 
-    if highlight_connectors == None:
+    if highlight_connectors is None:
 
         HC_trace = go.Scatter()
 
@@ -690,13 +697,13 @@ def interactive_dendrogram(
                 marker=dict(size=12.5, color=HC_color),
             )
 
-    ##Highlight the nodes that are in a particular volume
+    # Highlight the nodes that are in a particular volume
 
-    if in_volume == None:
+    if in_volume is None:
 
         in_volume_trace = go.Scatter()
 
-    elif in_volume != None:
+    elif in_volume is not None:
 
         # Volume of interest
 
@@ -756,10 +763,10 @@ def interactive_dendrogram(
         ),
     )
 
-    if inscreen == True:
-
+    if inscreen is True:
+        print("Finished in {} seconds".format(time.time() - start))
         return iplot(fig)
 
     else:
-
+        print("Finished in {} seconds".format(time.time() - start)
         return plot(fig, filename=filename)

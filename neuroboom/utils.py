@@ -2,7 +2,7 @@
 # This script contains utility functions
 # Importing dependencies
 
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union, Any
 
 import navis
 import networkx as nx
@@ -10,6 +10,7 @@ import numpy as np
 import pymaid
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
+
 
 def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
     """
@@ -33,9 +34,11 @@ def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
         x = x[0]
     return x
 
+
 def calc_cable(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
-    return_skdata: bool = False):
+    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList], return_skdata: bool = False
+):
+
     """
     # Calculate cable length between nodes - this function does not exist for navis neurons
     :param x:
@@ -86,9 +89,9 @@ def check_valid_pymaid_input(x: Any) -> Optional[pymaid.core.CatmaidNeuron]:
 
 
 def pymaid_topological_sort(
-
     x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
-    return_skdata: bool = False):
+    return_object: str = "list",
+):
 
     """
     Takes pymaid/CatmaidNeuron and topologically sorts the nodes
@@ -115,15 +118,16 @@ def pymaid_topological_sort(
     x = check_valid_pymaid_input(x)
 
     g = nx.DiGraph()
-    g.add_node(x.nodes[x.nodes.type == 'root'].treenode_id.values[0])
+    g.add_node(x.nodes[x.nodes.type == "root"].treenode_id.values[0])
     g.add_nodes_from(
         [
-            i for i in x.nodes.node_id.tolist()
-            if i != x.nodes[x.nodes.type == 'root'].treenode_id.values[0]
+            i
+            for i in x.nodes.node_id.tolist()
+            if i != x.nodes[x.nodes.type == "root"].treenode_id.values[0]
         ]
     )
 
-    for e in x.nodes[['treenode_id','parent_id']].values:
+    for e in x.nodes[["treenode_id", "parent_id"]].values:
 
         if e[1] is not None:
 
@@ -135,14 +139,14 @@ def pymaid_topological_sort(
 
     topological_sort = [i for i in nx.topological_sort(g)]
 
-    if return_object == 'list':
-        return(topological_sort)
-    elif return_object == 'dict':
-        topological_sort = didct(zip(topological_sort, range(0, len(topological_sort))))
-        return(topological_sort)
+    if return_object == "list":
+        return topological_sort
+    elif return_object == "dict":
+        topological_sort = dict(zip(topological_sort, range(0, len(topological_sort))))
+        return topological_sort
 
-    def pymaid_to_navis(
-    x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList]):
+
+def pymaid_to_navis(x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList]):
 
     """
     Takes pymaid/CatmaidNeuron and topologically sorts the nodes
@@ -152,9 +156,9 @@ def pymaid_topological_sort(
     x:                a pymaid/Catmaid neuron object
 
     return_skdata:    bool
-                      whether to return a list of node_ids topologically sorted
-                      or to return a dict where the keys are treenodes and the values
-                      are ranking in the topological sort
+                    whether to return a list of node_ids topologically sorted
+                    or to return a dict where the keys are treenodes and the values
+                    are ranking in the topological sort
 
     Returns
     --------
@@ -162,13 +166,14 @@ def pymaid_topological_sort(
 
     Examples
     --------
-    
     """
 
     x = check_valid_pymaid_input(x)
 
-    x.nodes['rank'] = x.nodes.treenode_id.map(pymaid_topological_sort(x, return_object = 'dict'))
-    x.nodes.sort_values(by = ['rank'], ascending = True, inplace = True)
+    x.nodes["rank"] = x.nodes.treenode_id.map(
+        pymaid_topological_sort(x, return_object="dict")
+    )
+    x.nodes.sort_values(by=["rank"], ascending=True, inplace=True)
 
     # Getting the topological sort of the pymaid neuron
     x_graph = x.graph
@@ -176,22 +181,24 @@ def pymaid_topological_sort(
 
     # Populating the xyz columns of nodes
 
-    for i, j in enumerate(x.nodes[['x','y','z']].values):
+    for i, j in enumerate(x.nodes[["x", "y", "z"]].values):
 
-        navis_neuron.nodes.loc[i, 'x'] = j[0]
-        navis_neuron.nodes.loc[i, 'y'] = j[1]
-        navis_neuron.nodes.loc[i, 'z'] = j[2]
+        navis_neuron.nodes.loc[i, "x"] = j[0]
+        navis_neuron.nodes.loc[i, "y"] = j[1]
+        navis_neuron.nodes.loc[i, "z"] = j[2]
 
     # adding type column
-    navis_neuron.nodes['type'] = x.nodes.type.copy()
+    navis_neuron.nodes["type"] = x.nodes.type.copy()
 
     # adding connectors
     navis_neuron.connectors = x.connectors.copy()
-    navis_neuron.connectors = [ 'pre' if i == 0 else 'post' for i in navis_neuron.connectors.type ]
+    navis_neuron.connectors = [
+        "pre" if i == 0 else "post" for i in navis_neuron.connectors.type
+    ]
 
     # adding soma & name
 
     navis_neuron.soma = x.soma
     navis_neuron.name = x.neuron_name
 
-    return(navis_neuron)
+    return navis_neuron

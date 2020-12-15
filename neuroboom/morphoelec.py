@@ -1,21 +1,17 @@
 # INSERT LICENSE
 import random
-import time
-from collections import Counter
-from typing import List, Optional, Tuple, Union
+from typing import Union
 
 import numpy as np
-import phate
-import scipy as sp
 import scipy.sparse as sparse
-import scprep
-import sklearn.decomposition  # PCA
-import sklearn.manifold  # t-SNE
 from scipy.sparse.linalg import spsolve
-from sklearn import metrics
 from sklearn.cluster import DBSCAN
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
+
+import navis
+import pymaid
+import seaborn as sns
+
+from neuroboom.utils import calc_cable, check_valid_neuron_input, check_valid_pymaid_input
 
 
 # Contains functions to model steady state passive electrotonic properties of neurons
@@ -386,7 +382,7 @@ def find_clusters(x, phate_operator, eps: float = 1.0, min_samples: int = 10):
     mat_red = phate_operator.fit_transform(x)
 
     # performing DBSCAN
-    labels, n_cluster_, n_noise = dbs_func(mat_red, eps, min_samples)
+    labels, n_clusters_, n_noise_ = dbs_func(mat_red, eps, min_samples)
 
     return (mat_red, labels, n_clusters_, n_noise_)
 

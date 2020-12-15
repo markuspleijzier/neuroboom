@@ -1,6 +1,6 @@
 # INSERT LICENSE
 from collections import Counter
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional
 
 import navis
 import navis.interfaces.neuprint as nvneu
@@ -27,8 +27,11 @@ def adjx_from_syn_conn(
 
     presyn_postsyn :    str
                         a string of either 'pre' or 'post'
-                        If 'pre', the function will search for the presynaptic connections / downstream neurons of x
-                        If 'post', the function will search for the postsynaptic connections / upstream neurons of x
+                        If 'pre', the function will search for the
+                        presynaptic connections / downstream neurons of x
+
+                        If 'post', the function will search for the
+                        postsynaptic connections / upstream neurons of x
 
     roi :               navis.Volume
                         A region of interest within which you are filtering the connections for
@@ -39,8 +42,11 @@ def adjx_from_syn_conn(
 
     Returns
     -------
-    df : a DataFrame where x are the columns, the connection type (pre/post) are the rows and the values the number of connections
-    partner_type_dict : a dictionary where the keys are bodyIds of the upstream/downstream neurons and the values are their types
+    df :                a DataFrame where x are the columns, the connection type (pre/post) are the rows
+                        and the values the number of connections
+
+    partner_type_dict : a dictionary where the keys are bodyIds of the
+                        upstream/downstream neurons and the values are their types
 
     Examples
     --------

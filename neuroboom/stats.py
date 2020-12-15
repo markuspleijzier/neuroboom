@@ -4,7 +4,7 @@
 import copy
 import random
 from collections import Counter
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import navis
 import navis.interfaces.neuprint as nvneu
@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from tqdm import tqdm
+
+from neuroboom.utils import check_valid_neuron_input
 
 
 def presynapse_focality(
@@ -72,7 +74,6 @@ def presynapse_focality(
         equals = np.equal(j, x.presynapses[["x", "y", "z"]].values)
         all_equals = [np.all(k) for k in equals]
         node_id = x.presynapses[all_equals].node_id.tolist()
-        # node_id = x.presynapses[[np.all(k) for k in np.equal(j, x.presynapses[['x', 'y', 'z']].values)]].node_id.tolist()
         synapse_connections.at[i, "node_id"] = node_id
 
     truth_list = [
