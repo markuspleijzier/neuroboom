@@ -1,5 +1,5 @@
 =========
-neuroboom
+welcome to
 =========
 
 .. image:: https://img.shields.io/travis/markuspleijzier/neuroboom.svg
@@ -10,14 +10,43 @@ neuroboom
 
 
 .. image:: /docs/source/_static/logos/nb_large_landing.png
-        :width: 600
+        :width: 1200
+        :class: with-shadow
 
-A suite of Python3 tools for visualisation and analysis of Connectomic data
 
-* Free software: 3-clause BSD license
-* Documentation: (COMING SOON!) https://markuspleijzier.github.io/neuroboom.
+
+Neuroboom is a suite of Python3 tools for analysing neuron reconstructions within Connectomic initiatives.
+Neuroboom is currently designed to operate on neuron recontructions within the *CATMAID* or *Neuprint* platforms.
+
+These two different platforms reflect the two available connectomic efforts in the fruit fly, Drosophila melanogaster:
+
+1. the `Full Adult Female Brain (FAFB) <https://www.sciencedirect.com/science/article/pii/S0092867418307876?via%3Dihub>`_ Zheng *et al.*, 2018, *Cell*
+2. the `Hemibrain <https://elifesciences.org/articles/57443>`_, Scheffer *et al.*, 2020, *eLife*
+
+Have I seen this before?
+----------------------------
+
+Some code incorporated within the neuroboom package has been presented in scientific papers, most notably the **dendrogram** functions:
+
+1. `Integration of Parallel Opposing Memories Underlies Memory Extinction <https://www.sciencedirect.com/science/article/pii/S0092867418310377?via%3Dihub>`_, J. Felsenberg *et al.*, 2018, *Cell*
+2. `Convergence of distinct subpopulations of mechanosensory neurons onto a neural circuit that elicits grooming <https://www.biorxiv.org/content/10.1101/2020.06.08.141341v1>`_, S. Hampel *et al.*, 2020, *biorXiv*
+
+
+
+Documentation
+-------------
+
+* neuroboom is on `readthedocs! <>`_
+
 
 Features
 --------
 
-* TODO
+* Dendrograms: 2D graph representations of neurons.
+  * Available in static renderings for scientific papers / representations
+  * Interactive renderings for exploratory analyses
+
+Coming soon:
+------------
+* synaptic focalisation
+* electrotonic modelling
