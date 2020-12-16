@@ -79,7 +79,7 @@ Graphviz is a dependency of NetworkX, so there is no need to import Graphviz/PyG
 
 Other (non-issue) Dependencies
 -------------------------------
-`pymaid <https://pymaid.readthedocs.io/en/latest/source/install.html/`_
+`pymaid <https://pymaid.readthedocs.io/en/latest/source/install.html/>`_
 
 `navis  <https://navis.readthedocs.io/en/latest/index.html>`_
 
