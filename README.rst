@@ -1,5 +1,5 @@
 =========
-welcome to
+neuroboom
 =========
 
 .. image:: https://img.shields.io/travis/markuspleijzier/neuroboom.svg
@@ -15,8 +15,8 @@ welcome to
 
 
 
-Neuroboom is a suite of Python3 tools for analysing neuron reconstructions within Connectomic initiatives.
-Neuroboom is currently designed to operate on neuron recontructions within the *CATMAID* or *Neuprint* platforms.
+Neuroboom is a suite of Python 3 tools for analysing neuron reconstructions within Connectomic initiatives.
+This package is currently designed to operate on neuron recontructions within the *CATMAID* or *Neuprint* platforms.
 
 These two different platforms reflect the two available connectomic efforts in the fruit fly, Drosophila melanogaster:
 
