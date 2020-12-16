@@ -2,6 +2,9 @@
 Release History
 ===============
 
+v0.1.92 (2020-12-16)
+* fixing dendrogram return
+
 v0.1.8 (2020-12-11)
 * upload fix 4
 
