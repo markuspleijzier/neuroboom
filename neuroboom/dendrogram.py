@@ -765,8 +765,8 @@ def interactive_dendrogram(
 
     if inscreen is True:
         print("Finished in {} seconds".format(time.time() - start))
-        return iplot(fig)
+        return(iplot(fig))
 
     else:
         print("Finished in {} seconds".format(time.time() - start)
-        return plot(fig, filename=filename)
+        return(plot(fig, filename=filename))
