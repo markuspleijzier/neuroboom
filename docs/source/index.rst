@@ -28,7 +28,7 @@ Some code incorporated within the neuroboom package has been presented in publis
 .. toctree::
    :maxdepth: 2
 
-   installation-and-usage
+   installation
    usage
    release-history
    min_versions
