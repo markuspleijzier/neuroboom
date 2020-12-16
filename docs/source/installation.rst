@@ -99,7 +99,7 @@ Other (non-issue) Dependencies
 
 `sklearn <https://scikit-learn.org/stable/install.html>`_
 
-`scprep <https://github.com/KrishnaswamyLab/scprep`_
+`scprep <https://github.com/KrishnaswamyLab/scprep>`_
 
 `scipy <http://scipy.org>`_
 
