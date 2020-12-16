@@ -6,29 +6,26 @@
 neuroboom Documentation
 =======================
 
-Welcome to **neuroboom**!
+**Welcome to neuroboom**!
+
 
 Neuroboom is a suite of Python3 tools for analysing neuron reconstructions within Connectomic initiatives.
-
-Neuroboom is currently designed to operate on neuron recontructions within the CATMAID or Neuprint platforms.
+Neuroboom is currently designed to operate on neuron recontructions within the *CATMAID* or *Neuprint* platforms.
 
 These two different platforms reflect the two available connectomic efforts in the fruit fly, Drosophila melanogaster:
 
-1. the Full Adult Female Brain (FAFB) Zheng et al., 2018, Cell
-2. the Hemibrain, Xu et al., 2020, biorXiv
+1. the `Full Adult Female Brain (FAFB) <https://www.sciencedirect.com/science/article/pii/S0092867418307876?via%3Dihub>`_ Zheng *et al.*, 2018, *Cell*
+2. the `Hemibrain <https://elifesciences.org/articles/57443>`_, Scheffer *et al.*, 2020, *eLife*
 
 
-Some code incorporated within the neuroboom package has been presented in published scientific papers, most notably the **dendrogram** functions:
+Some code incorporated within the neuroboom package has been presented in scientific papers, most notably the **dendrogram** functions:
 
 1. `Integration of Parallel Opposing Memories Underlies Memory Extinction <https://www.sciencedirect.com/science/article/pii/S0092867418310377?via%3Dihub>`_, J. Felsenberg et al., 2018, *Cell*
-2. `Distinct subpopulations of mechanosensory chordotonal organ neurons elicit grooming of the fruit fly antennae <https://elifesciences.org/articles/59976>`_, S. Hampel et al., 2020, *eLife*
-
+2. `Convergence of distinct subpopulations of mechanosensory neurons onto a neural circuit that elicits grooming <https://www.biorxiv.org/content/10.1101/2020.06.08.141341v1>`_, S. Hampel et al., 2020, *biorXiv*
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    installation
    usage
-   release-history
-   min_versions
