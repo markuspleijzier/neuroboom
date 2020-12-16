@@ -29,3 +29,5 @@ Some code incorporated within the neuroboom package has been presented in scient
 
    installation
    usage
+   release-history
+   min_versions
