@@ -6,6 +6,9 @@
 neuroboom Documentation
 =======================
 
+.. image:: neuroboom/docs/source/_static/logos/nb_large_landing.png
+  :width: 600
+
 **Welcome to neuroboom**!
 
 
