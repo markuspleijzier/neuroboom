@@ -38,12 +38,12 @@ scientific presentations.
 
 For static dendrograms execute:
 
-:: code-block:: python
+.. code-block:: python
 
     from neuroboom.dendrogram import plot_dendrogram
 
-OR for interactive dendrograms: 
+OR for interactive dendrograms:
 
-:: code-block:: python
+.. code-block:: python
 
     from neuroboom.dendrogram import interactive_dendrogram

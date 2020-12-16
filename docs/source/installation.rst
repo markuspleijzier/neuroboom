@@ -61,7 +61,7 @@ Installing the graph rendering engines is a little more complicated and one cann
 
 To install Graphviz, one must first install homebrew:
 
-**`Homebrew <https://brew.sh/>`_**
+* `Homebrew <https://brew.sh/>`_
 
 ::
 
@@ -71,13 +71,13 @@ Simply copy and paste the above into the terminal.
 
 Then to install Graphviz:
 
-**`Graphviz <http://www.graphviz.org/>`_**
+* `Graphviz <http://www.graphviz.org/>`_
 
 ::
 
     $ brew install Graphviz
 
-**`PyGraphviz <http://pygraphviz.github.io/>`_**
+* `PyGraphviz <http://pygraphviz.github.io/>`_
 
 To install PyGraphviz, we need to direct pip (this time using pip3) to where Graphviz is located.
 To do this, simply paste this snippet into the terminal:
@@ -87,7 +87,7 @@ To do this, simply paste this snippet into the terminal:
     pip3 install --install-option="--include-path=/usr/local/include/" --install-option="--library-path=/usr/local/lib/" pygraphviz
 
 
-Graphviz is a dependency of NetworkX, so there is no need to import Graphviz/PyGraphviz in your python environment when using neuroboom. 
+Graphviz is a dependency of NetworkX, so there is no need to import Graphviz/PyGraphviz in your python environment when using neuroboom.
 
 
 Other (non-issue) Dependencies
