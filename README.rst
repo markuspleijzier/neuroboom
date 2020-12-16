@@ -9,6 +9,9 @@ neuroboom
         :target: https://pypi.python.org/pypi/neuroboom
 
 
+.. image:: neuroboom/docs/source/_static/logos/nb_large_landing.png
+        :width: 600
+
 A suite of Python3 tools for visualisation and analysis of Connectomic data
 
 * Free software: 3-clause BSD license
