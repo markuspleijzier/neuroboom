@@ -56,7 +56,7 @@ def prepare_neuron(
     if check_valid_neuron_input(x):
 
         node_sort = dict(
-            [(i, k) for i, k in zip(range(len(x.nodes)), navis.node_label_sorting(x))]
+            [(i, k) for i, k in zip(range(len(x.nodes)), navis.graph_utils.node_label_sorting(x))]
         )
         node_sort_rev = {i: j for j, i in node_sort.items()}
         navis.downsample_neuron(x, downsampling_factor=float("inf"), inplace=True)
