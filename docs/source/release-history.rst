@@ -2,6 +2,9 @@
 Release History
 ===============
 
+v0.1.93 (2021-01-7)
+* compatibility fix with navis v0.5, fixing neuronlist access
+
 v0.1.92 (2020-12-16)
 * fixing dendrogram return
 
