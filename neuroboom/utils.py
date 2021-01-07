@@ -26,17 +26,17 @@ def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
 
     """
     assert isinstance(
-        x, (navis.TreeNeuron, navis.neuronlist.NeuronList)
+        x, (navis.TreeNeuron, navis.NeuronList)
     ), f"Need to pass a Navis Tree Neuron type. You have passed: {x}"
 
-    if isinstance(x, navis.neuronlist.NeuronList):
+    if isinstance(x, navis.NeuronList):
         assert len(x) < 1, "Need to pass a SINGLE Neuron"
         x = x[0]
     return x
 
 
 def calc_cable(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList], return_skdata: bool = False
+    x: Union[navis.TreeNeuron, navis.NeuronList], return_skdata: bool = False
 ):
 
     """

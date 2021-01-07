@@ -16,7 +16,7 @@ from neuroboom.utils import calc_cable, check_valid_neuron_input
 
 
 def create_graph_structure(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     returned_object: str = "graph",
     prog: str = "dot",
 ):
@@ -90,7 +90,7 @@ def create_graph_structure(
 
 
 def plot_dendrogram(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     heal_neuron: bool = False,
     downsample_neuron: float = 0.0,
     plot_connectors: bool = True,
@@ -373,7 +373,7 @@ def plot_dendrogram(
 
 # Plot an interactive dendrogram
 def interactive_dendrogram(
-    z: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    z: Union[navis.TreeNeuron, navis.NeuronList],
     heal_neuron: bool = True,
     plot_nodes: bool = True,
     plot_connectors: bool = True,

@@ -18,7 +18,7 @@ from neuroboom.utils import calc_cable, check_valid_neuron_input, check_valid_py
 def prepare_neuron(
     x: Union[
         navis.TreeNeuron,
-        navis.neuronlist.NeuronList,
+        navis.NeuronList,
         pymaid.core.CatmaidNeuron,
         pymaid.core.CatmaidNeuronList,
     ],
@@ -117,7 +117,7 @@ def prepare_neuron(
 def calculate_M_mat(
     x: Union[
         navis.TreeNeuron,
-        navis.neuronlist.NeuronList,
+        navis.NeuronList,
         pymaid.core.CatmaidNeuron,
         pymaid.core.CatmaidNeuronList,
     ],

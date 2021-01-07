@@ -17,7 +17,7 @@ from neuroboom.utils import check_valid_neuron_input
 
 
 def presynapse_focality(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     heal_fragmented_neuron: bool = False,
     confidence_threshold: tuple((float, float)) = (0.9, 0.9),
     num_synapses_threshold: int = 1,
@@ -114,7 +114,7 @@ def presynapse_focality(
 
 
 def postsynapse_focality(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     heal_fragmented_neuron: bool = False,
     split_neuron: bool = False,
     confidence_threshold: tuple((float, float)) = (0.9, 0.9),
@@ -212,7 +212,7 @@ def postsynapse_focality(
 
 
 def permut_test(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     measuring_node: int,
     synapse_connections: pd.DataFrame,
     relation: str = "presyn",
@@ -338,7 +338,7 @@ def permut_test(
 
 
 def permutation_test_complete(
-    x: Union[navis.TreeNeuron, navis.neuronlist.NeuronList],
+    x: Union[navis.TreeNeuron, navis.NeuronList],
     n_iter: int = 10,
     remove_fragments: bool = True,
 ):
