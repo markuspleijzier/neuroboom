@@ -58,7 +58,7 @@ def adjx_from_syn_conn(
 
         if roi:
 
-            tt = navis.in_volume(con[["x_pre," "y_pre", "z_pre"]].values, roi)
+            tt = navis.in_volume(con[["x_pre", "y_pre", "z_pre"]].values, roi)
             con = con[tt].copy()
 
         neurons = con.bodyId_post.unique()

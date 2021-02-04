@@ -60,8 +60,8 @@ def prepare_neuron(
         )
         node_sort_rev = {i: j for j, i in node_sort.items()}
         navis.downsample_neuron(x, downsampling_factor=float("inf"), inplace=True)
-        x.nodes["rank"] = x.nodes.node_id.map(node_sort_rev).tolist()
-        x.nodes.sort_values(by=["rank"], ascending=True, inplace=True)
+        x.nodes["node_rank"] = x.nodes.node_id.map(node_sort_rev).tolist()
+        x.nodes.sort_values(by=["node_rank"], ascending=True, inplace=True)
         x.nodes.reset_index(drop=True, inplace=True)
 
         x = calc_cable(x, return_skdata=True)
@@ -89,8 +89,8 @@ def prepare_neuron(
         x = pymaid.downsample_neuron(x, resampling_factor=float("inf"))
         x = pymaid.guess_radius(x)
 
-        x.nodes["rank"] = x.nodes.treenode_id.map(node_sort_rev).tolist()
-        x.nodes.sort_values(by=["rank"], ascending=True, inplace=True)
+        x.nodes["node_rank"] = x.nodes.treenode_id.map(node_sort_rev).tolist()
+        x.nodes.sort_values(by=["node_rank"], ascending=True, inplace=True)
         x.nodes.reset_index(drop=True, inplace=True)
 
         x = pymaid.calc_cable(x, return_skdata=True)
