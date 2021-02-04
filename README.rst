@@ -35,7 +35,7 @@ Some code incorporated within the neuroboom package has been presented in scient
 Documentation
 -------------
 
-* neuroboom is on `readthedocs! <>`_
+* neuroboom is on readthedocs
 
 
 Features
