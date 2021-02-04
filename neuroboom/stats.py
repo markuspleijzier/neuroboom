@@ -321,8 +321,8 @@ def permut_test(
             random.shuffle(pS)
             pD.append(
                 np.abs(
-                    np.average(pS[0 : int(len(pS) / 2)])
-                    - np.average(pS[int(len(pS) / 2) :])
+                    np.average(pS[0: int(len(pS) / 2)])
+                    - np.average(pS[int(len(pS) / 2):])
                 )
             )
 
