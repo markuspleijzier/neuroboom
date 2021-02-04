@@ -38,7 +38,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="A suite of python tools for visualisation and analysis of Connectomic data",
-    long_description=README,
+    long_description=open('README.rst').read(),
     long_description_content_type='text/x-rst',
     author="Markus William Pleijzier",
     author_email='mp824@cam.ac.uk',
