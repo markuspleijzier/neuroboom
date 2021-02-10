@@ -71,7 +71,7 @@ def adjx_from_syn_conn(
 
     elif presyn_postsyn == "post":
 
-        con = nvneu.fetch_synapse_connections(source_criteria=x)
+        con = nvneu.fetch_synapse_connections(target_criteria=x)
 
         if roi:
 
