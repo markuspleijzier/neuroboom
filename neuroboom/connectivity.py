@@ -69,6 +69,8 @@ def adjx_from_syn_conn(
         count = count.most_common()
         count_dict = dict(count)
 
+        df = pd.DataFrame(columns = [x], index = [i for i, j in count], data = [count_dict[i] for i, j in count])
+
     elif presyn_postsyn == "post":
 
         con = nvneu.fetch_synapse_connections(target_criteria=x)
@@ -86,9 +88,10 @@ def adjx_from_syn_conn(
         count = count.most_common()
         count_dict = dict(count)
 
-    df = pd.DataFrame(
-        columns=[x], index=[i for i, j in count], data=[count_dict[i] for i, j in count]
-    )
+        df = pd.DataFrame(columns = [i for i, j in count], index = [x], data = [count_dict[i] for i, j in count])
+
+    # df = pd.DataFrame(
+    #     columns=[x], index=[i for i, j in count], data=[count_dict[i] for i, j in count])
 
     if rename_index:
 
