@@ -26,22 +26,22 @@ script:
   - codecov  # Upload the report to codecov.
   - set -e # If any of the following steps fail, just stop at that point
   - make -C docs html  # Build the documentation.
-  - pip install doctr
-  - doctr deploy --built-docs docs/build/html . # Publish the documentation
+  #- pip install doctr
+  #- doctr deploy --built-docs docs/build/html . # Publish the documentation
 
-#deploy:
+deploy:
   # Use github pages to deploy process
-#  provider: pages
+  provider: pages
   # Keep pages that were built
-#  skip-cleanup: true
+  skip-cleanup: true
   # Directory where the html files are generated
-#  local_dir: docs/build/html
+  local_dir: docs/build/html
   # Github security/auth token
-#  github-token: $944a1765399bd5f9e6e24948f9192b1047d8e352
+  github-token: $944a1765399bd5f9e6e24948f9192b1047d8e352
   # Incremental commit to keep old build/files from previous deployments
-#  keep-history: false
+  keep-history: false
   # Git branch on which it should deploy (master, gh-pages)
-#  target_branch: gh-pages
-#  on:
+  target_branch: gh-pages
+  on:
     # which branch on commit/push will trigger deployment
-#    branch: master
+    branch: master
