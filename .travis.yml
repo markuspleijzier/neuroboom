@@ -32,7 +32,7 @@ script:
   - set -e # If any of the following steps fail, just stop at that point
   - rm -rf docs/build/html
   - make -C docs html  # Build the documentation.
-  #- make -C docs html  # Build the documentation.
+  #- make -C docs html  # Build documentation.
   #- pip install doctr
   #- doctr deploy --built-docs docs/build/html . # Publish the documentation
 
