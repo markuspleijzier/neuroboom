@@ -18,7 +18,7 @@ The code has since been developed to handle reconstructions from different envir
 As an example, let's take a look at figure 4 from Felsenberg et al., 2018.
 
 .. image:: /_static/dendrogram_figures/fig4_A.png
-    :width: 200
+    :width: 800
     :class: with-shadow
 
 We have three neurons:
@@ -33,13 +33,13 @@ However, the locations of MVP2 presynapses differ between the postsynaptic neuro
 For M6, we can see that the MVP2 presynapses are, in general, located at the root of the dendritic tree.
 
 .. image:: /_static/dendrogram_figures/fig_4_E_F.png
-    :width: 200
+    :width: 800
     :class: with-shadow
 
 In contrast, the MVP2 presynapses onto M4 are located on the distal branches of M4.
 
-:: image:: /_static/dendrogram_figures/fig_4_C_D.png
-    :width: 200
+.. image:: /_static/dendrogram_figures/fig_4_C_D.png
+    :width: 800
     :class: with-shadow
 
 This specific synaptic layout enables MVP2, which is GABAergic, to inhibit M6 more easily compared to M4.
@@ -79,8 +79,8 @@ So lets get some example neurons to work with.
   nbd.plot_dendrogram(example_skeleton, prog = 'dot')
   plt.show()
 
-:: image:: /_static/dendrogram_figures/example_dot.png
-    :width: 200
+.. image:: /_static/dendrogram_figures/example_dot.png
+    :width: 800
     :class: with-shadow
 
 
@@ -98,8 +98,8 @@ Setting the **prog** argument to *neato* however, produces the layout seen in Fe
   plt.show()
 
 
-:: image:: /_static/dendrogram_figures/example_neato.png
-    :width: 200
+.. image:: /_static/dendrogram_figures/example_neato.png
+    :width: 800
     :class: with-shadow
 
 In the *neato* type of layout, imagine a spring representing each edge in the graph.
