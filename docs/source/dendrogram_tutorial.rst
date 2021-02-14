@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Tutorial for making *Dendrograms*
-=======================
+=================================
 
 What are Dendrograms?
 
@@ -46,7 +46,7 @@ This specific synaptic layout enables MVP2, which is GABAergic, to inhibit M6 mo
 This inhibition is required for aversive memory extinction i.e. for learning that things that were once aversively conditioned, no longer are (forgetting).
 
 How to create Dendrograms
-=======================
+=========================
 
 This tutorial will focus on creating dendrograms using the hemibrain dataset, released by Janelia Research Campus in 2020.
 
@@ -68,13 +68,13 @@ So lets get some example neurons to work with.
   example_neuron = navis.example_neurons(n = 1).id
 
   # Now we have to fetch the skeleton -- this is important, the dendrogram code works on skeleton objects, not neuron objects
-  example_skeleton = nvneu.fetch_skeletons(example_neuron)
+  example_skeleton = nvneu.fetch_skeletons(example_neuron, heal = True)
 
 
 ::
   # Plot the dendrogram
   plt.clf()
-  fig, ax = plt.subplots(figsize = (20,20))
+  fig, ax = plt.subplots(figsize = (10,10))
   nbd.plot_dendrogram(example_skeleton, prog = 'dot')
   plt.show()
 
@@ -88,6 +88,15 @@ For *dot*, this produces a hierarchical layout, with the leaf nodes at the top o
 Setting the **prog** argument to *neato* however, produces the layout seen in Felsenberg *et al.*, 2018 and in the example below.
 
 
+::
+
+  # Plot the neato dendrogram
+  plt.clf()
+  fig, ax = plt.subplots(figsize = (10,10))
+  nbd.plot_dendrogram(example_skeleton, downsample_neuron = 1e3, prog = 'neato')
+  plt.show()
+
+
 :: image:: /_static/dendrogram_figures/example_neato.png
     :width: 200
     :class: with-shadow
@@ -97,4 +106,4 @@ The *force* in this spring is proportional to the length of the two nodes connec
 The springs are allowed to then settle and an equilibrium is found which minimises the crossover of edges.
 
 **NOTE: the neato layout can take some to time to calculate. **
-**Therefore, it  is highly recommended to downsample the neuron (reduce the number of nodes) ** 
+**Therefore, it  is highly recommended to downsample the neuron (reduce the number of nodes) **
