@@ -33,5 +33,6 @@ Some code incorporated within the neuroboom package has been presented in scient
 
    installation
    usage
+   dendrogram_tutorial
    release-history
    min_versions

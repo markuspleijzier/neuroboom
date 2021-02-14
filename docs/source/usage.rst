@@ -28,6 +28,7 @@ There are two options for dendrograms:
 
 Static dendrograms are Matplotlib plots containing the 2D representation.
 These are best for scientific paper figures / presentations.
+** See the dendrogram tutorial **
 
 2. Interactive
 

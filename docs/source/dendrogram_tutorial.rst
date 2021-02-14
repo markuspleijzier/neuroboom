@@ -52,7 +52,7 @@ This tutorial will focus on creating dendrograms using the hemibrain dataset, re
 
 First, import neuroboom's dendrogram code and the other dependencies.
 
-::
+.. code-block:: python
 
   import matplotlib.pyplot as plt
   import navis as nv
@@ -62,7 +62,7 @@ First, import neuroboom's dendrogram code and the other dependencies.
 Neuroboom's functionality heavily relies on a package called **navis**, created by Philipp Schlegel.
 So lets get some example neurons to work with.
 
-::
+.. code-block:: python
 
   # first lets first an example neuron id
   example_neuron = navis.example_neurons(n = 1).id
@@ -71,7 +71,8 @@ So lets get some example neurons to work with.
   example_skeleton = nvneu.fetch_skeletons(example_neuron, heal = True)
 
 
-::
+.. code-block:: python
+
   # Plot the dendrogram
   plt.clf()
   fig, ax = plt.subplots(figsize = (10,10))
@@ -88,7 +89,7 @@ For *dot*, this produces a hierarchical layout, with the leaf nodes at the top o
 Setting the **prog** argument to *neato* however, produces the layout seen in Felsenberg *et al.*, 2018 and in the example below.
 
 
-::
+.. code-block:: python
 
   # Plot the neato dendrogram
   plt.clf()
