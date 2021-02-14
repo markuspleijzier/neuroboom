@@ -105,5 +105,5 @@ In the *neato* type of layout, imagine a spring representing each edge in the gr
 The *force* in this spring is proportional to the length of the two nodes connected by that edge.
 The springs are allowed to then settle and an equilibrium is found which minimises the crossover of edges.
 
-**NOTE: the neato layout can take some to time to calculate. **
-**Therefore, it  is highly recommended to downsample the neuron (reduce the number of nodes) **
+** NOTE: the neato layout can take some to time to calculate **
+** Therefore, it  is highly recommended to downsample the neuron (reduce the number of nodes) **
