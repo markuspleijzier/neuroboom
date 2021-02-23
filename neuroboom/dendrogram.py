@@ -61,6 +61,10 @@ def create_graph_structure(
 
     print("Creating Graph Structure...")
 
+    if 'parent_dist' not in x.nodes:
+        print("Calculating cable lengths...")
+        x = calc_cable(x, return_skdata=True)
+
     g = nx.DiGraph()
     g.add_nodes_from(x.nodes.node_id)
     for e in x.nodes[["node_id", "parent_id", "parent_dist"]].values:
