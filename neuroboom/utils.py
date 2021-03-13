@@ -52,7 +52,8 @@ def calc_cable(
     tn_coords = nodes[["x", "y", "z"]].values
 
     this_tn = nodes.set_index("node_id")
-    parent_coords = this_tn.reindex(nodes.parent_id.values, ["x", "y", "z"]).values
+    parent_coords = this_tn.reindex(index = nodes.parent_id.values,
+    columns = ["x", "y", "z"]).values
 
     w = np.sqrt(np.sum((tn_coords - parent_coords) ** 2, axis=1))
 
