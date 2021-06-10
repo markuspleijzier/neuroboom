@@ -341,6 +341,7 @@ def permutation_test_complete(
     x: Union[navis.TreeNeuron, navis.NeuronList],
     n_iter: int = 10,
     remove_fragments: bool = True,
+    confidence_threshold: tuple = (0.9, 0.9)
 ):
 
     """
@@ -378,10 +379,10 @@ def permutation_test_complete(
     """
 
     a_pre, a_df = presynapse_focality(
-        x, heal_fragmented_neuron=False, confidence_threshold=(0.9, 0.9)
+        x, heal_fragmented_neuron=False, confidence_threshold=confidence_threshold
     )
     b_post, b_df = postsynapse_focality(
-        x, heal_fragmented_neuron=False, confidence_threshold=(0.9, 0.9)
+        x, heal_fragmented_neuron=False, confidence_threshold=confidence_threshold
     )
 
     presyn_pt = permut_test(
