@@ -13,7 +13,7 @@ def adjx_from_syn_conn(
     x: List[int],
     presyn_postsyn: str = "pre",
     roi: Optional = None,
-    ct: tuple = (0.0, 0.0)
+    ct: tuple = (0.0, 0.0),
     rename_index: bool = False,
 ):
 
@@ -121,7 +121,6 @@ def match_connectors_to_nodes(
     synapse_connections: pd.DataFrame,
     neuron: navis.TreeNeuron,
     synapse_type: str = 'post'
-
 ):
     """
     Matches connections to skeleton nodes
