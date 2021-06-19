@@ -13,6 +13,7 @@ def adjx_from_syn_conn(
     x: List[int],
     presyn_postsyn: str = "pre",
     roi: Optional = None,
+    ct: tuple = (0.0, 0.0)
     rename_index: bool = False,
 ):
 
@@ -35,6 +36,13 @@ def adjx_from_syn_conn(
 
     roi :               navis.Volume
                         A region of interest within which you are filtering the connections for
+
+
+    ct :                tuple
+                        Confidence threshold tuple containing the confidence value to filter above
+                        The first value is presynaptic confidence and the second value postsynaptic confidence
+                        e.g. (0.9, 0.8) will filter for connections where the presynaptic confidence > 0.9
+                        and the postsynaptic confidence > 0.8
 
     rename_index :      bool
                         Whether to rename the index using the type of the connected neuron
@@ -61,6 +69,10 @@ def adjx_from_syn_conn(
             tt = navis.in_volume(con[["x_pre", "y_pre", "z_pre"]].values, roi)
             con = con[tt].copy()
 
+        if ct[0] or ct[1] > 0.0:
+
+            con = con[(con.confidence_pre > ct[0]) & (con.confidence_post > ct[1])].copy()
+
         neurons = con.bodyId_post.unique()
         n, _ = nvneu.fetch_neurons(neurons)
         partner_type_dict = dict(zip(n.bodyId.tolist(), n.type.tolist()))
@@ -79,6 +91,10 @@ def adjx_from_syn_conn(
 
             tt = navis.in_volume(con[["x_post", "y_post", "z_post"]].values, roi)
             con = con[tt].copy()
+
+        if ct[0] or ct[1] > 0.0:
+
+            con = con[(con.confidence_pre > ct[0]) & (con.confidence_post > ct[1])].copy()
 
         neurons = con.bodyId_pre.unique()
         n, _ = nvneu.fetch_neurons(neurons)
