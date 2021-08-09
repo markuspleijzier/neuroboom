@@ -6,7 +6,7 @@ numpy
 networkx
 plotly
 pandas
-pymaid
+python-catmaid
 phate
 seaborn
 sklearn

@@ -282,8 +282,17 @@ def plot_dendrogram(
 
     # Whether to add soma or not
     if not fragment:
-        print("Plotting soma")
-        plt.scatter([pos[x.soma][0]], [pos[x.soma][1]], s=80, c=[[0, 0, 0]], zorder=1)
+
+        if type(x.soma) == np.ndarray:
+
+            print("Plotting soma")
+            soma = x.soma[0]
+            plt.scatter([pos[soma][0]], [pos[soma][1]], s = 80, c = [[0, 0, 0]], zorder = 1)
+
+        else:
+
+            print("Plotting soma")
+            plt.scatter([pos[x.soma][0]], [pos[x.soma][1]], s=80, c=[[0, 0, 0]], zorder=1)
 
     if plot_connectors:
         print("Plotting connectors...")
