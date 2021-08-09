@@ -65,7 +65,7 @@ def calc_cable(
     return np.sum(w[np.logical_not(np.isnan(w))]) / 1000
 
 
-def check_valid_pymaid_input(x: Any) -> Optional[pymaid.core.CatmaidNeuron]:
+def check_valid_pymaid_input(x: Any) -> Optional[pymaid.CatmaidNeuron]:
 
     """
     Takes an object and checks whether it is a navis TreeNeuron object
@@ -80,17 +80,17 @@ def check_valid_pymaid_input(x: Any) -> Optional[pymaid.core.CatmaidNeuron]:
 
     """
     assert isinstance(
-        x, (pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList)
+        x, (pymaid.CatmaidNeuron, pymaid.CatmaidNeuronList)
     ), f"Need to pass a Navis Tree Neuron type. You have passed: {x}"
 
-    if isinstance(x, pymaid.core.CatmaidNeuron):
+    if isinstance(x, pymaid.CatmaidNeuron):
         assert len(x) < 1, "Need to pass a SINGLE Neuron"
         x = x[0]
     return x
 
 
 def pymaid_topological_sort(
-    x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
+    x: Union[pymaid.CatmaidNeuron, pymaid.CatmaidNeuronList],
     return_object: str = "list",
 ):
 
