@@ -147,7 +147,7 @@ def pymaid_topological_sort(
         return topological_sort
 
 
-def pymaid_to_navis(x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList]):
+def pymaid_to_navis(x: Union[pymaid.CatmaidNeuron, pymaid.CatmaidNeuronList]):
 
     """
     Takes pymaid/CatmaidNeuron and topologically sorts the nodes
