@@ -11,7 +11,6 @@ import pymaid
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
 
-
 def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
     """
     Takes an object and checks whether it is a navis TreeNeuron object
@@ -87,6 +86,7 @@ def check_valid_pymaid_input(x: Any) -> Optional[pymaid.CatmaidNeuron]:
         assert len(x) < 1, "Need to pass a SINGLE Neuron"
         x = x[0]
     return x
+
 
 
 def pymaid_topological_sort(
