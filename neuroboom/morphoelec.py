@@ -1,18 +1,23 @@
 # INSERT LICENSE
 import random
-from typing import Union
+from typing import Optional, Union, Any
 
 import numpy as np
 import scipy.sparse as sparse
 from scipy.sparse.linalg import spsolve
+import scipy.spatial.distance as ssd
 from sklearn.cluster import DBSCAN
 
 import navis
 import pymaid
 import seaborn as sns
 
-from neuroboom.utils import calc_cable, check_valid_neuron_input, check_valid_pymaid_input
+import itertools
+from collections import Counter
 
+
+from neuroboom import dendrogram as nbd
+from neuroboom.utils import calc_cable, check_valid_neuron_input, check_valid_pymaid_input
 
 # Contains functions to model steady state passive electrotonic properties of neurons
 def prepare_neuron(
@@ -423,3 +428,321 @@ def cluster_palette(cmap: str = "hsv", n_objects: int = 10, shuffle: bool = Fals
     label_to_col[-1] = (0.0, 0.0, 0.0)
 
     return label_to_col
+
+
+def match_connectors_to_nodes(synapse_connections, neuron, synapse_type = 'post'):
+
+    if synapse_type == 'post':
+
+        u = synapse_connections[['x_post','y_post','z_post']].values
+        v = neuron.postsynapses[['x','y','z']].values
+
+        data = ssd.cdist(u, v, metric = 'euclidean')
+
+        dist_mat = pd.DataFrame(index = [i for i in range(0, synapse_connections.shape[0])],
+                                columns = [i for i in range(0, neuron.postsynapses.shape[0])],
+                                data = data)
+
+
+
+        ind = [np.argmin(dist_mat.iloc[i, :]) for i in range(0, synapse_connections.shape[0])]
+
+        syn_con = synapse_connections.copy()
+        syn_con['connector'] = [neuron.postsynapses.iloc[i, :].connector_id for i in ind]
+
+        # creating a connector to node dictionary
+
+        c2n = dict(zip(neuron.postsynapses.connector_id.tolist(), neuron.postsynapses.node_id.tolist()))
+        syn_con['node'] = syn_con.connector.map(c2n)
+
+    elif synapse_type == 'pre':
+
+        u = synapse_connections[['x_pre','y_pre','z_pre']].values
+        v = neuron.presynapses[['x','y','z']].values
+
+        data = ssd.cdist(u, v, metric = 'euclidean')
+
+        dist_mat = pd.DataFrame(index = [i for i in range(0, synapse_connections.shape[0])],
+                                columns = [i for i in range(0, neuron.presynapses.shape[0])],
+                                data = data)
+
+
+
+        ind = [np.argmin(dist_mat.iloc[i, :]) for i in range(0, synapse_connections.shape[0])]
+
+        syn_con = synapse_connections.copy()
+        syn_con['connector'] = [neuron.presynapses.iloc[i, :].connector_id for i in ind]
+
+        # creating connector to node dictionary
+
+        c2n = dict(zip(neuron.presynapses.connector_id.tolist(), neuron.presynapses.node_id.tolist()))
+        syn_con['node'] = syn_con.connector.map(c2n)
+
+
+    return(syn_con)
+
+def permute_start_end(test, test_in_roi, cluster):
+
+    start_end = [i for i in itertools.permutations(test.nodes[test_in_roi][test.nodes[test_in_roi].node_cluster == cluster].node_id.tolist(), 2)]
+
+    return(start_end)
+
+def cluster_to_all_nodes(neuron, start_end_node_pairs):
+
+    g = nbd.create_graph_structure(neuron, returned_object = 'graph')
+    g_rev = g.reverse()
+
+    nodes_of_cluster = []
+
+    for i, j in start_end_node_pairs:
+
+        paths = nx.all_simple_paths(g_rev, source = i, target = j)
+
+        for path in paths:
+
+            nodes_of_cluster.append(path)
+
+    nodes_of_cluster = list(np.unique(list(chain.from_iterable(nodes_of_cluster))))
+    return(nodes_of_cluster)
+
+
+def quick_optimisation(x, min_samples_start):
+
+    """
+    x : a neuronlist
+    min_samples_start: the minimum number of samples to start off with
+
+    """
+    min_samples_optim_values = []
+    err = []
+
+    for i in x:
+
+        print(i.id, i.name)
+
+        n = i.copy()
+
+        try:
+
+            n_prep = prepare_neuron(n, change_units = True, factor = 1e3)
+
+        except IndexError:
+
+            err.append(i.id)
+
+            continue
+
+        n_m, n_memcap = calculate_M_mat(n_prep, solve = False)
+        n_m_solved = np.linalg.inv(sparse.csr_matrix.todense(n_m))
+
+        phate_operator = phate.PHATE(n_components = 3, n_jobs = -2, verbose = False)
+
+        min_sample_range = [i for i in range(0, min_samples_start + 1)][::-1]
+
+        for j in min_sample_range:
+
+            mat_red, labels, n_clust, n_noise = nbm.find_clusters(n_m_solved, phate_operator, eps=1e-02, min_samples = j)
+
+            if n_noise == 0:
+
+                min_samples_optim_values.append((i.id, j))
+
+                break
+
+            else:
+
+                continue
+
+    return(min_samples_optim_values, err)
+
+def find_compartments_in_roi(neuron, roi, min_samples):
+
+    n = neuron.copy()
+    n_prep = prepare_neuron(n, change_units=True, factor = 1e3)
+    n_m, n_memcap = calculate_M_mat(n_prep, solve = False)
+    n_m_solved = np.linalg.inv(sparse.csr_matrix.todense(n_m))
+
+    phate_operator = phate.PHATE(n_components=3, n_jobs=-2, verbose = False)
+
+    mat_red, labels, n_clusters, n_noise = nbm.find_clusters(n_m_solved, phate_operator, eps = 1e-02, min_samples = min_samples)
+
+    node_to_label = dict(zip(range(0, len(labels)), labels))
+
+    n_prep.nodes['node_cluster'] = n_prep.nodes.index.map(node_to_label)
+
+    n_in_roi = navis.in_volume(n_prep.nodes[['x','y','z']] * 1e3, roi, mode = 'IN', inplace = False)
+
+    return(n_prep, n_in_roi)
+
+def matching_inputs_to_compartments(neuron_id, roi):
+
+    # Fetch the healed skeleton
+    full_skeleton = nvneu.fetch_skeletons(neuron_id, heal = True)[0]
+    # which of the whole neuron's nodes are in the roi
+    skeleton_in_roi = navis.in_volume(full_skeleton.nodes[['x','y','z']], roi, mode='IN')
+
+    # Fetch the neurons synapses
+    postsyn = nvneu.fetch_synapse_connections(target_criteria = neuron_id)
+    # match the connectors to nodes
+    syn_to_node = match_connectors_to_nodes(postsyn, full_skeleton, synapse_type = 'post')
+    # which of these are in the roi
+    roi_syn_con = syn_to_node[syn_to_node.node.isin(full_skeleton.nodes[skeleton_in_roi].node_id.tolist())].copy()
+
+    # Count how many synapses the upstream neurons have on your neuron of interest
+    n_syn = dict(Counter(roi_syn_con.bodyId_pre.tolist()).most_common())
+
+    # fetch these neurons
+    a, b = nvneu.fetch_neurons(roi_syn_con.bodyId_pre.unique())
+    a['n_syn'] = [n_syn[i] for i in a.bodyId.tolist()]
+
+    # adding the instance names to the synapses in the roi
+    bid_to_instance = dict(zip(a.bodyId.tolist(), a.instance.tolist()))
+    roi_syn_con['instance'] = [bid_to_instance[i] for i in roi_syn_con.bodyId_pre]
+
+    # compartmentalise the neuron and find the nodes in each compartment for the prepared neuron
+    compartments_in_roi, nodes_in_roi = find_compartments_in_roi(full_skeleton, ca, 6)
+    clusters = compartments_in_roi.nodes.node_cluster.unique()
+
+    cluster_dict = {}
+
+    # find the nodes that make up each compartment in the full neuron
+    for i in clusters:
+
+        clust_nodes = cluster_to_all_nodes(full_skeleton, start_end_node_pairs=permute_start_end(compartments_in_roi, nodes_in_roi, cluster = i))
+        cluster_dict[i] = clust_nodes
+
+    #cluster_dict = {k : s for s, k in cluster_dict.items()}
+    #roi_syn_con['compartment'] = [cluster_dict[i] for i in roi_syn_con.node.tolist()]
+
+    return(cluster_dict)
+    #return(roi_syn_con)
+
+    #return(full_skeleton, skeleton_in_roi, skeleton_prep, roi_syn_con, a)
+
+
+def find_compartments_of_missing_nodes(roi_syn_con, nodes_with_cluster, full_neuron, ds_neuron):
+
+    """
+    DS neuron -- downsampled_neuron
+    """
+
+    # find the connections associated to nodes that do not have a cluster
+    nodes_to_query = roi_syn_con[~roi_syn_con.node.isin(nodes_with_cluster)].node.tolist()
+
+    # create a geodesic matrix between the nodes that do not have a compartment and the original, non-downsampled neuron
+    gmat = navis.geodesic_matrix(full_neuron, nodes_to_query)
+
+    # subset the above geodesic matrix columns to only contain the nodes in the downsampled neuron
+    reduced_gmat = gmat.T[np.isin(gmat.T.index, ds_neuron.nodes.node_id.tolist())].T.copy()
+
+    # find the node which is the smallest distance away from the unclassified node
+    closest_classified_node = list(reduced_gmat.columns[np.argmin(reduced_gmat.values, axis = 1)])
+
+    closest_classified_node_to_cluster = ds_neuron.nodes[ds_neuron.nodes.node_id.isin(np.unique(closest_classified_node))]
+    closest_classified_node_to_cluster = dict(zip(closest_classified_node_to_cluster.node_id, closest_classified_node_to_cluster.node_cluster))
+
+    query_nodes_to_closest_node = dict(zip(np.unique(nodes_to_query), np.array(reduced_gmat.columns[np.argmin(reduced_gmat.values, axis = 1)])))
+
+    comps = [closest_classified_node_to_cluster[query_nodes_to_closest_node[i]] for i in query_nodes_to_closest_node.keys()]
+
+    query_nodes_to_compartment = dict(zip(query_nodes_to_closest_node.keys(), comps))
+
+    return(query_nodes_to_compartment)
+
+
+def node_to_compartment_full_neuron(original_neuron, ds_neuron):
+
+    """
+    DS neuron - downsampled neuron (one that has been run through find_compartments_in_roi function)
+    """
+
+    # nodes to query
+    ntq = np.isin(original_neuron.nodes.node_id.tolist(), ds_neuron.nodes.node_id.tolist())
+    ntq = original_neuron.nodes[~ntq].node_id.tolist()
+
+    # geodesic matrix
+    gmat = navis.geodesic_matrix(original_neuron, ntq)
+
+    #subset the columns to the nodes that are in the downsampled neuron
+    red_gmat = gmat.T[np.isin(gmat.T.index, ds_neuron.nodes.node_id)].T.copy()
+
+    ntc = dict(zip(red_gmat.index.tolist(),
+                  list(chain.from_iterable([ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]]))))
+
+    ntc = {**ntc, **dict(zip(ds_neuron.nodes.node_id.tolist(), ds_neuron.nodes.node_cluster.tolist()))}
+
+    original_neuron.nodes['node_cluster'] = [ntc[i] for i in original_neuron.nodes.node_id]
+
+    return(original_neuron)
+
+def compartmentalise_neuron(neuron_id, roi):
+
+    # Fetching the neuron
+    ds_neuron = nvneu.fetch_skeletons(neuron_id, heal = True)[0]
+    original_neuron = nvneu.fetch_skeletons(neuron_id, heal = True)[0]
+
+    # Electrotonic model
+    DS_NEURON = prepare_neuron(ds_neuron, change_units = True, factor = 1e3)
+    test_m, test_memcap = calculate_M_mat(DS_NEURON, solve = False)
+    test_m_solved = np.linalg.inv(sparse.csr_matrix.todense(test_m))
+
+    # running PHATE
+    phate_operator = phate.PHATE(n_components = 3, n_jobs = -2, verbose = False)
+
+    mat_red, labels, n_clusters, n_noise = nbm.find_clusters(test_m_solved,
+                                                              phate_operator,
+                                                              eps = 1e-02,
+                                                              min_samples = 6)
+
+    # index and labels
+    index_to_label = dict(zip(range(0, len(labels)), labels))
+    ds_neuron.nodes['node_cluster'] = ds_neuron.nodes.index.map(index_to_label)
+
+    node_to_compartment = dict(zip(ds_neuron.nodes.node_id.tolist(),
+                                   ds_neuron.nodes.node_cluster.tolist()))
+
+    unique_compartments = ds_neuron.nodes.node_cluster.unique()
+
+    # Finding the cluster of the nodes that were removed when downsampling the neuron
+    whole_neuron_node_to_cluster = []
+
+    for i in unique_compartments:
+
+        start_end = [i for i in itertools.permutations(ds_neuron.nodes[ds_neuron.nodes.node_cluster == i].node_id.tolist(), 2)]
+
+        nodes_of_cluster = cluster_to_all_nodes(original_neuron, start_end)
+
+        node_to_cluster_dictionary = dict(zip(nodes_of_cluster, [i] * len(nodes_of_cluster)))
+
+        whole_neuron_node_to_cluster.append(node_to_cluster_dictionary)
+
+    whole_neuron_node_to_cluster_dict = {k : v for d in whole_neuron_node_to_cluster for k, v in d.items()}
+
+    #Fetching postsynapses
+    ds_neuron_postsynapses = nvneu.fetch_synapse_connections(target_criteria=neuron_id)
+
+    ds_neuron_synapse_to_node = match_connectors_to_nodes(ds_neuron_postsynapses,
+                                                          original_neuron,
+                                                          synapse_type = 'post')
+
+    #Which nodes are in the CA?
+    skeleton_in_roi = navis.in_volume(original_neuron.nodes[['x','y','z']].values, roi, inplace = False)
+    roi_syn_con = ds_neuron_synapse_to_node[ds_neuron_synapse_to_node.node.isin(original_neuron.nodes[skeleton_in_roi].node_id.tolist())].copy()
+
+    a, b = nvneu.fetch_neurons(roi_syn_con.bodyId_pre.unique())
+    bid_to_instance = dict(zip(a.bodyId.tolist(), a.instance.tolist()))
+    roi_syn_con['instance'] = [bid_to_instance[i] for i in roi_syn_con.bodyId_pre]
+
+    nodes_to_query = roi_syn_con[~roi_syn_con.node.isin(whole_neuron_node_to_cluster_dict.keys())].node.tolist()
+    comp_of_missing_nodes = find_compartments_of_missing_nodes(roi_syn_con,
+                                                               list(whole_neuron_node_to_cluster_dict.keys()),
+                                                               original_neuron,
+                                                               ds_neuron)
+
+    whole_neuron_node_to_cluster_dict = {**whole_neuron_node_to_cluster_dict, **comp_of_missing_nodes}
+
+    roi_syn_con['compartment'] = [whole_neuron_node_to_cluster_dict[i] for i in roi_syn_con.node.tolist()]
+
+    original_neuron = node_to_compartment_full_neuron(original_neuron, ds_neuron)
+
+    return(original_neuron, ds_neuron, roi_syn_con)
