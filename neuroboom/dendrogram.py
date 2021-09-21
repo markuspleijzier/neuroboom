@@ -16,9 +16,11 @@ from neuroboom.utils import calc_cable, check_valid_neuron_input
 
 
 def create_graph_structure(
-    x: Union[navis.TreeNeuron, navis.NeuronList],
+    neuron: Union[navis.TreeNeuron, navis.NeuronList],
+    xyz_locs: bool = True,
     returned_object: str = "graph",
     prog: str = "dot",
+    verbose: bool = False
 ):
 
     """
@@ -41,7 +43,7 @@ def create_graph_structure(
     --------
     """
 
-    x = check_valid_neuron_input(x)
+    neuron = check_valid_neuron_input(neuron)
 
     valid_objects = ["graph", "positions", "graph_and_positions"]
 
@@ -59,34 +61,51 @@ def create_graph_structure(
         prog in valid_progs
     ), f"Invalid program parameter. You need to pass one of {valid_progs}"
 
-    print("Creating Graph Structure...")
+    if verbose:
+        print("Creating Graph Structure...")
 
-    if 'parent_dist' not in x.nodes:
-        print("Calculating cable lengths...")
-        x = calc_cable(x, return_skdata=True)
+    if 'parent_dist' not in neuron.nodes:
+
+        if verbose:
+            print("Calculating cable lengths...")
+        neuron = calc_cable(neuron, return_skdata=True)
 
     g = nx.DiGraph()
-    g.add_nodes_from(x.nodes.node_id)
-    for e in x.nodes[["node_id", "parent_id", "parent_dist"]].values:
-        # Skip root node
+    g.add_nodes_from(neuron.nodes.node_id)
+
+    for e in neuron.nodes[['node_id','parent_id','parent_dist']].values:
+        # skip root node
         if e[1] == -1:
             continue
         g.add_edge(int(e[0]), int(e[1]), len=e[2])
+        #g.add_edge(int(e[0]), int(e[1]), normal=e[2])
+
+        if xyz_locs:
+
+            vals = neuron.nodes[['x','y','z']].values
+            pos_dict = dict(zip(neuron.nodes.node_id, vals))
+
+            nx.set_node_attributes(g, pos_dict, 'pos')
 
     if returned_object == "graph":
-        print("Returning graph only")
+        if verbose:
+            print("Returning graph only")
         return g
 
     elif returned_object == "positions":
-        print("Calculating layout...")
+        if verbose:
+            print("Calculating layout...")
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
-        print("Returning positions only")
+        if verbose:
+            print("Returning positions only")
         return pos
 
     elif returned_object == "graph_and_positions":
-        print("Calculating layout...")
+        if verbose:
+            print("Calculating layout...")
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
-        print("Returning graph and positions")
+        if verbose:
+            print("Returning graph and positions")
         return (g, pos)
 
 
@@ -99,6 +118,7 @@ def plot_dendrogram(
     downsample_neuron: float = 0.0,
     plot_connectors: bool = True,
     connector_confidence: Tuple[float, float] = (0.0, 0.0),
+    highlight_nodes: Optional = None,
     highlight_connectors: Optional = None,
     fragment: bool = False,
     presyn_color: List[List[float]] = [[0.9, 0.0, 0.0]],
@@ -325,6 +345,27 @@ def plot_dendrogram(
             s=postsyn_size,
             linewidths=1,
         )
+
+    if highlight_nodes is not None:
+
+        if isinstance(highlight_nodes, dict):
+
+            hl_tn_coords = np.array(
+                [
+                    pos[tn] for tn in highlight_nodes.keys()
+
+                ]
+            )
+
+            tn_col = [highlight_nodes[i] for i in highlight_nodes.keys()]
+
+            plt.scatter(
+                hl_tn_coords[:, 0],
+                hl_tn_coords[:, 1],
+                s = 10,
+                c = tn_col,
+                zorder = 3
+            )
 
     if highlight_connectors is not None:
 
