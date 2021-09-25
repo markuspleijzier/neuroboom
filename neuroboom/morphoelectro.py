@@ -597,14 +597,12 @@ def node_to_compartment_full_neuron(original_neuron, ds_neuron):
     #subset the columns to the nodes that are in the downsampled neuron
     red_gmat = gmat.T[np.isin(gmat.T.index, ds_neuron.nodes.node_id)].T.copy()
 
-    red_gmat_index = reg_gmat.index.tolist()
-    nest_list = [ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]
-    unnest_list = list(chain.from_iterable(nest_list))
-    n2c = dict(zip(red_gmat_index), unnest_list)
+    #red_gmat_index = reg_gmat.index.tolist()
+    #nest_list = [ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]
+    #unnest_list = list(chain.from_iterable(nest_list))
+    #n2c = dict(zip(red_gmat_index), unnest_list)
 
-    # ntc = dict(zip(red_gmat.index.tolist(),
-    #               list(chain.from_iterable([ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist()
-    # for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]]))))
+    ntc = dict(zip(red_gmat.index.tolist(), list(chain.from_iterable([ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]]))))
 
     ntc = {**ntc, **dict(zip(ds_neuron.nodes.node_id.tolist(), ds_neuron.nodes.node_cluster.tolist()))}
 
