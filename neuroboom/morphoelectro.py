@@ -237,6 +237,78 @@ def current_injection(conducM, curramp):
 
     return(Vm_mat)
 
+
+
+def dbs_func(x, eps: float = 1.0, min_samples: int = 10):
+
+    """
+    Parameters
+    --------
+    x:              A matrix to perform DBSCAN on
+
+    eps:            float
+                    The radius of the search circle
+
+    min_samples:    int
+                    The minimum number of samples to include in a cluster
+
+    Returns
+    --------
+    labels:         cluster label of each datapoint
+    n_clusters_:    number of unique clusters
+    n_noise_:       number of noise points
+
+    Examples
+    --------
+
+    """
+
+    db = DBSCAN(eps=eps, min_samples=min_samples).fit(x)
+    labels = db.labels_
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise_ = list(labels).count(-1)
+
+    return (labels, n_clusters_, n_noise_)
+
+def find_clusters(x, phate_operator, eps: float = 1.0, min_samples: int = 10):
+
+    """
+    Parameters
+    --------
+    x:              A matrix to perform DBSCAN on
+
+    phate_operator: phate.operator object
+                    The operator used to perform the dimensionality reduction
+                    The number of dimensions to reduce to
+                    is specified in this operator object
+
+    eps:            float
+                    Radius of the search circle
+
+    min_samples:    int
+                    Minimum number of samples to include in a cluster
+
+    Returns
+    --------
+    mat_red:        Matrix wih dimensions reduced
+    labels:         Cluster label of each datapoint
+    n_clusters_:    Number of unique clusters
+    n_noise_:       Number of noise points
+
+    Examples
+    --------
+
+    """
+
+    # performing PHATE dimensionality reduction
+    mat_red = phate_operator.fit_transform(x)
+
+    # performing DBSCAN
+    labels, n_clusters_, n_noise_ = dbs_func(mat_red, eps, min_samples)
+
+    return (mat_red, labels, n_clusters_, n_noise_)
+
+
 def match_connectors_to_nodes(synapse_connections, neuron, synapse_type = 'post'):
 
     if synapse_type == 'post':
