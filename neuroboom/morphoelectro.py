@@ -614,7 +614,7 @@ def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     # Fetching the neuron
     ds_neuron = nvneu.fetch_skeletons(neuron_id, heal=True)[0]
-    original_neuron = nvneu.fetch_skeletons(neuron_id, heal=True)[0]
+    original_neuron = ds_neuron.copy()
 
     # Electrotonic model
     DS_NEURON = prepare_neuron(ds_neuron, change_units=True, factor=1e3)
@@ -644,7 +644,7 @@ def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     for i in unique_compartments:
 
-        nodes_to_permute = ds_neuron.nodes[ds_neuron.node_cluster == i].node_id.tolist()
+        nodes_to_permute = ds_neuron.nodes[ds_neuron.nodes.node_cluster == i].node_id.tolist()
 
         start_end = [i for i in itertools.permutations(nodes_to_permute, 2)]
 
