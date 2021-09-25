@@ -6,8 +6,7 @@ import fafbseg
 import cloudvolume
 import time
 from typing import Optional, Union, Any, List, Tuple
-​
-​
+
 def random_sample_from_volume(
     volume: navis.Volume,
     supervoxels: cloudvolume.frontends.precomputed.CloudVolumePrecomputed,
