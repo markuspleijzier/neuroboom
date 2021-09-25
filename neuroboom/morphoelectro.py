@@ -465,7 +465,7 @@ def quick_optimisation(x, min_samples_start):
 
         for j in min_sample_range:
 
-            mat_red, labels, n_clust, n_noise = nbm.find_clusters(n_m_solved, phate_operator, eps=1e-02, min_samples=j)
+            mat_red, labels, n_clust, n_noise = find_clusters(n_m_solved, phate_operator, eps=1e-02, min_samples=j)
 
             if n_noise == 0:
 
@@ -494,7 +494,7 @@ def find_compartments_in_roi(neuron,
 
     phate_operator = phate.PHATE(n_components=3, n_jobs=-2, verbose=False)
 
-    mat_red, labels, n_clusters, n_noise = nbm.find_clusters(n_m_solved, phate_operator, eps=1e-02, min_samples=min_samples)
+    mat_red, labels, n_clusters, n_noise = find_clusters(n_m_solved, phate_operator, eps=1e-02, min_samples=min_samples)
 
     node_to_label = dict(zip(range(0, len(labels)), labels))
 
@@ -507,7 +507,10 @@ def find_compartments_in_roi(neuron,
 
 def matching_inputs_to_compartments(
         neuron_id: int,
-        roi: navis.Volume):
+        roi: navis.Volume,
+        Ra = Ra,
+        Rm = Rm,
+        Cm = Cm):
 
     # Fetch the healed skeleton
     full_skeleton = nvneu.fetch_skeletons(neuron_id, heal=True)[0]
@@ -533,7 +536,7 @@ def matching_inputs_to_compartments(
     roi_syn_con['instance'] = [bid_to_instance[i] for i in roi_syn_con.bodyId_pre]
 
     # compartmentalise the neuron and find the nodes in each compartment for the prepared neuron
-    compartments_in_roi, nodes_in_roi = find_compartments_in_roi(full_skeleton, roi, 6)
+    compartments_in_roi, nodes_in_roi = find_compartments_in_roi(full_skeleton, roi=roi, min_samples=6, Cm=Cm, Ra=Ra, Rm=Rm)
     clusters = compartments_in_roi.nodes.node_cluster.unique()
 
     cluster_dict = {}
@@ -594,13 +597,8 @@ def node_to_compartment_full_neuron(original_neuron, ds_neuron):
     # geodesic matrix
     gmat = navis.geodesic_matrix(original_neuron, ntq)
 
-    #subset the columns to the nodes that are in the downsampled neuron
+    # subset the columns to the nodes that are in the downsampled neuron
     red_gmat = gmat.T[np.isin(gmat.T.index, ds_neuron.nodes.node_id)].T.copy()
-
-    #red_gmat_index = reg_gmat.index.tolist()
-    #nest_list = [ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]
-    #unnest_list = list(chain.from_iterable(nest_list))
-    #n2c = dict(zip(red_gmat_index), unnest_list)
 
     ntc = dict(zip(red_gmat.index.tolist(), list(chain.from_iterable([ds_neuron.nodes[ds_neuron.nodes.node_id == i].node_cluster.tolist() for i in red_gmat.columns[np.argmin(red_gmat.values, axis = 1)]]))))
 
