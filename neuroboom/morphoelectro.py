@@ -610,7 +610,13 @@ def node_to_compartment_full_neuron(original_neuron, ds_neuron):
     return(original_neuron)
 
 
-def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
+def compartmentalise_neuron(
+        neuron_id: int,
+        Rm: float,
+        Ra: float,
+        Cm: float,
+        roi: navis.Volume,
+        return_electromodel: bool):
 
     # Fetching the neuron
     ds_neuron = nvneu.fetch_skeletons(neuron_id, heal=True)[0]
@@ -690,4 +696,10 @@ def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     original_neuron = node_to_compartment_full_neuron(original_neuron, ds_neuron)
 
-    return(original_neuron, ds_neuron, roi_syn_con)
+    if return_electromodel:
+
+        return(original_neuron, ds_neuron, roi_syn_con, test_m, test_memcap)
+
+    else:
+        
+        return(original_neuron, ds_neuron, roi_syn_con)
