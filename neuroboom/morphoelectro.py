@@ -1,5 +1,6 @@
 from typing import Optional, Union, Any
 import numpy as np
+import pandas as pd
 import random
 from collections import Counter
 import itertools
@@ -315,6 +316,22 @@ def find_clusters(x, phate_operator, eps: float = 1.0, min_samples: int = 10):
     return (mat_red, labels, n_clusters_, n_noise_)
 
 
+def match_nodes_to_compartment(labels, label_to_col, neuron, node_color):
+
+    node_to_label = dict(zip(range(len(labels)), labels))
+    node_to_color = {i : label_to_col[j] for i, j in node_to_label.items()}
+
+    neuron.nodes['node_cluster'] = neuron.nodes.index.map(node_to_label).to_numpy()
+
+    if node_color:
+
+        neuron.nodes['node_color'] = neuron.nodes.index.map(node_to_color).to_numpy()
+
+    node_to_index = dict(zip(neuron.nodes.node_id, neuron.nodes.index))
+
+    return(neuron, node_to_label, node_to_color, node_to_index)
+
+
 def match_connectors_to_nodes(synapse_connections, neuron, synapse_type = 'post'):
 
     if synapse_type == 'post':
@@ -547,7 +564,7 @@ def compartmentalise_neuron(neuron_id, roi):
     # running PHATE
     phate_operator = phate.PHATE(n_components = 3, n_jobs = -2, verbose = False)
 
-    mat_red, labels, n_clusters, n_noise = nbm.find_clusters(test_m_solved,
+    mat_red, labels, n_clusters, n_noise = find_clusters(test_m_solved,
                                                               phate_operator,
                                                               eps = 1e-02,
                                                               min_samples = 6)
