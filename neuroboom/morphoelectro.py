@@ -1,21 +1,27 @@
+from typing import Optional, Union, Any
 import numpy as np
+import random
+from collections import Counter
+import itertools
+
 import navis
 import neuprint as neu
 import navis.interfaces.neuprint as nvneu
+import pymaid
+
 import scipy.sparse as sparse
 from scipy.sparse.linalg import spsolve
-from typing import Optional, Union, Any
+from sklearn.cluster import DBSCAN
 import phate
-import random
 import scprep
 import scipy.spatial.distance as ssd
-from collections import Counter
-import itertools
-import pymaid
+
 from neuroboom import utils as nbu
 
 
-def prepare_neuron(x, change_units = True, factor = 1e3):
+def prepare_neuron(x,
+change_units = True,
+factor = 1e3):
 
     if isinstance(x, (navis.TreeNeuron, navis.NeuronList)):
 
