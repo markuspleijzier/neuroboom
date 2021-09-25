@@ -508,9 +508,9 @@ def find_compartments_in_roi(neuron,
 def matching_inputs_to_compartments(
         neuron_id: int,
         roi: navis.Volume,
-        Ra = Ra,
-        Rm = Rm,
-        Cm = Cm):
+        Ra: float,
+        Rm: float,
+        Cm: float):
 
     # Fetch the healed skeleton
     full_skeleton = nvneu.fetch_skeletons(neuron_id, heal=True)[0]
