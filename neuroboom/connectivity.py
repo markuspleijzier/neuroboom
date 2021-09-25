@@ -81,7 +81,7 @@ def adjx_from_syn_conn(
         count = count.most_common()
         count_dict = dict(count)
 
-        df = pd.DataFrame(columns = [x], index = [i for i, j in count], data = [count_dict[i] for i, j in count])
+        df = pd.DataFrame(columns=[x], index=[i for i, j in count], data=[count_dict[i] for i, j in count])
 
     elif presyn_postsyn == "post":
 
@@ -104,7 +104,7 @@ def adjx_from_syn_conn(
         count = count.most_common()
         count_dict = dict(count)
 
-        df = pd.DataFrame(index = [i for i, j in count], columns = [x], data = [count_dict[i] for i, j in count])
+        df = pd.DataFrame(index=[i for i, j in count], columns=[x], data=[count_dict[i] for i, j in count])
         df = df.T.copy()
 
     # df = pd.DataFrame(
@@ -115,75 +115,3 @@ def adjx_from_syn_conn(
         df.index = [partner_type_dict[i] for i in df.index]
 
     return (df, partner_type_dict)
-
-
-def match_connectors_to_nodes(
-    synapse_connections: pd.DataFrame,
-    neuron: navis.TreeNeuron,
-    synapse_type: str = 'post'
-):
-    """
-    Matches connections to skeleton nodes
-
-    Parameters
-    ----------
-    synapse_connections :       pandas.DataFrame
-                                A pandas dataframe containing the synapse connections of the neuron of interest
-                                synapse connections is created using nvneu.fetch_synapse_connections()
-
-    neuron :                    navis.TreeNeuron
-                                A navis TreeNeuron skeleton of the neuron of interest
-
-    synapse_type :              str
-                                A string of ['pre' or 'post'] determining whether presynapses or postsynapses are matched to nodes
-
-    """
-
-    if synapse_type == 'post':
-
-        u = synapse_connections[['x_post','y_post','z_post']].values
-        v = neuron.postsynapses[['x','y','z']].values
-
-        data = ssd.cdist(u, v, metric = 'euclidean')
-
-        dist_mat = pd.DataFrame(index = [i for i in range(0, synapse_connections.shape[0])],
-                                columns = [i for i in range(0, neuron.postsynapses.shape[0])],
-                                data = data)
-
-
-
-        ind = [np.argmin(dist_mat.iloc[i, :]) for i in range(0, synapse_connections.shape[0])]
-
-        syn_con = synapse_connections.copy()
-        syn_con['connector'] = [neuron.postsynapses.iloc[i, :].connector_id for i in ind]
-
-        # creating a connector to node dictionary
-
-        c2n = dict(zip(neuron.postsynapses.connector_id.tolist(), neuron.postsynapses.node_id.tolist()))
-        syn_con['node'] = syn_con.connector.map(c2n)
-
-    elif synapse_type == 'pre':
-
-        u = synapse_connections[['x_pre','y_pre','z_pre']].values
-        v = neuron.presynapses[['x','y','z']].values
-
-        data = ssd.cdist(u, v, metric = 'euclidean')
-
-        dist_mat = pd.DataFrame(index = [i for i in range(0, synapse_connections.shape[0])],
-                                columns = [i for i in range(0, neuron.presynapses.shape[0])],
-                                data = data)
-
-
-
-        ind = [np.argmin(dist_mat.iloc[i, :]) for i in range(0, synapse_connections.shape[0])]
-
-        syn_con = synapse_connections.copy()
-        syn_con['connector'] = [neuron.presynapses.iloc[i, :].connector_id for i in ind]
-
-        # creating connector to node dictionary
-
-        c2n = dict(zip(neuron.presynapses.connector_id.tolist(), neuron.presynapses.node_id.tolist()))
-        syn_con['node'] = syn_con.connector.map(c2n)
-
-
-    return(syn_con)

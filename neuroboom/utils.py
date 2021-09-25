@@ -11,7 +11,8 @@ import pymaid
 
 # Calculating cable length between nodes - this function does not exist for navis neurons
 
-def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
+
+def check_valid_neuron_input(x: navis.TreeNeuron):
     """
     Takes an object and checks whether it is a navis TreeNeuron object
 
@@ -26,7 +27,7 @@ def check_valid_neuron_input(x: Any) -> Optional[navis.TreeNeuron]:
     """
     assert isinstance(
         x, (navis.TreeNeuron, navis.NeuronList)
-    ), f"Need to pass a Navis Tree Neuron type. You have passed: {x}"
+    ), f"Need to pass a Navis Tree Neuron type. You have passed: {type(x)}"
 
     if isinstance(x, navis.NeuronList):
         assert len(x) < 1, "Need to pass a SINGLE Neuron"
@@ -51,8 +52,8 @@ def calc_cable(
     tn_coords = nodes[["x", "y", "z"]].values
 
     this_tn = nodes.set_index("node_id")
-    parent_coords = this_tn.reindex(index = nodes.parent_id.values,
-    columns = ["x", "y", "z"]).values
+    parent_coords = this_tn.reindex(index=nodes.parent_id.values,
+                                    columns=["x", "y", "z"]).values
 
     w = np.sqrt(np.sum((tn_coords - parent_coords) ** 2, axis=1))
 
@@ -88,7 +89,6 @@ def check_valid_pymaid_input(x: Any) -> Optional[pymaid.core.CatmaidNeuron]:
     return x
 
 
-
 def pymaid_topological_sort(
     x: Union[pymaid.core.CatmaidNeuron, pymaid.core.CatmaidNeuronList],
     return_object: str = "list",
@@ -111,9 +111,6 @@ def pymaid_topological_sort(
 
     Examples
     --------
-
-
-
     """
 
     x = check_valid_pymaid_input(x)

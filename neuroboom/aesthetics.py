@@ -1,10 +1,11 @@
-from typing import Optional, Union, Any
-
 import seaborn as sns
 import random
 
 
-def define_color_palette(cmap, n_clusters, shuffle = False):
+def define_color_palette(
+            cmap: str = 'hsv',
+            n_clusters: int = 10,
+            shuffle: bool = False):
 
     pal = sns.color_palette(cmap, n_clusters)
 

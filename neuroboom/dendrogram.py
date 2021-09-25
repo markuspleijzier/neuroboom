@@ -73,16 +73,15 @@ def create_graph_structure(
     g = nx.DiGraph()
     g.add_nodes_from(neuron.nodes.node_id)
 
-    for e in neuron.nodes[['node_id','parent_id','parent_dist']].values:
+    for e in neuron.nodes[['node_id', 'parent_id', 'parent_dist']].values:
         # skip root node
         if e[1] == -1:
             continue
         g.add_edge(int(e[0]), int(e[1]), len=e[2])
-        #g.add_edge(int(e[0]), int(e[1]), normal=e[2])
 
         if xyz_locs:
 
-            vals = neuron.nodes[['x','y','z']].values
+            vals = neuron.nodes[['x', 'y', 'z']].values
             pos_dict = dict(zip(neuron.nodes.node_id, vals))
 
             nx.set_node_attributes(g, pos_dict, 'pos')
@@ -307,7 +306,7 @@ def plot_dendrogram(
 
             print("Plotting soma")
             soma = x.soma[0]
-            plt.scatter([pos[soma][0]], [pos[soma][1]], s = 80, c = [[0, 0, 0]], zorder = 1)
+            plt.scatter([pos[soma][0]], [pos[soma][1]], s=80, c=[[0, 0, 0]], zorder=1)
 
         else:
 
@@ -362,15 +361,15 @@ def plot_dendrogram(
             plt.scatter(
                 hl_tn_coords[:, 0],
                 hl_tn_coords[:, 1],
-                s = 10,
-                c = tn_col,
-                zorder = 3
+                s=10,
+                c=tn_col,
+                zorder=3
             )
 
     if highlight_connectors is not None:
 
         if isinstance(highlight_connectors, (list, np.ndarray)):
-            hl_cn_coords = np.array(
+            hl_cn_coords=np.array(
                 [
                     pos[tn]
                     for tn in x.connectors[
