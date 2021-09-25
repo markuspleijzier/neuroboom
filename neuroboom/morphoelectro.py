@@ -668,7 +668,7 @@ def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     # Which nodes are in the CA?
     skeleton_in_roi = navis.in_volume(original_neuron.nodes[['x', 'y', 'z']].values, roi, inplace=False)
-    ds_isin = ds_neuron_synapse_to_node.node.isin(original_neuron.nodes[sksleton_in_roi]).node_id.tolist()
+    ds_isin = ds_neuron_synapse_to_node.node.isin(original_neuron.nodes[skeleton_in_roi]).node_id.tolist()
     roi_syn_con = ds_neuron_synapse_to_node[ds_isin].copy()
 
     #roi_syn_con = ds_neuron_synapse_to_node[ds_neuron_synapse_to_node.node.isin(
