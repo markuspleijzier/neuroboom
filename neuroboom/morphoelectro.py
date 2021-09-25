@@ -383,6 +383,9 @@ def match_connectors_to_nodes(synapse_connections, neuron, synapse_type = 'post'
 
     return(syn_con)
 
+
+
+
 def permute_start_end(test, test_in_roi, cluster):
 
     start_end = [i for i in itertools.permutations(test.nodes[test_in_roi][test.nodes[test_in_roi].node_cluster == cluster].node_id.tolist(), 2)]
@@ -406,6 +409,9 @@ def cluster_to_all_nodes(neuron, start_end_node_pairs):
 
     nodes_of_cluster = list(np.unique(list(chain.from_iterable(nodes_of_cluster))))
     return(nodes_of_cluster)
+
+
+
 
 def quick_optimisation(x, min_samples_start):
 
@@ -456,11 +462,16 @@ def quick_optimisation(x, min_samples_start):
 
     return(min_samples_optim_values, err)
 
-def find_compartments_in_roi(neuron, roi, min_samples):
+def find_compartments_in_roi(neuron,
+                            Rm,
+                            Ra,
+                            Cm,
+                            roi,
+                            min_samples):
 
     n = neuron.copy()
     n_prep = prepare_neuron(n, change_units=True, factor = 1e3)
-    n_m, n_memcap = calculate_M_mat(n_prep, solve = False)
+    n_m, n_memcap = calculate_M_mat(n_prep, Rm, Ra, Cm, solve = False)
     n_m_solved = np.linalg.inv(sparse.csr_matrix.todense(n_m))
 
     phate_operator = phate.PHATE(n_components=3, n_jobs=-2, verbose = False)
@@ -501,7 +512,7 @@ def matching_inputs_to_compartments(neuron_id, roi):
     roi_syn_con['instance'] = [bid_to_instance[i] for i in roi_syn_con.bodyId_pre]
 
     # compartmentalise the neuron and find the nodes in each compartment for the prepared neuron
-    compartments_in_roi, nodes_in_roi = find_compartments_in_roi(full_skeleton, ca, 6)
+    compartments_in_roi, nodes_in_roi = find_compartments_in_roi(full_skeleton, roi, 6)
     clusters = compartments_in_roi.nodes.node_cluster.unique()
 
     cluster_dict = {}
@@ -550,7 +561,7 @@ def find_compartments_of_missing_nodes(roi_syn_con, nodes_with_cluster, full_neu
 
     return(query_nodes_to_compartment)
 
-def compartmentalise_neuron(neuron_id, roi):
+def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     # Fetching the neuron
     ds_neuron = nvneu.fetch_skeletons(neuron_id, heal = True)[0]
@@ -558,7 +569,7 @@ def compartmentalise_neuron(neuron_id, roi):
 
     # Electrotonic model
     DS_NEURON = prepare_neuron(ds_neuron, change_units = True, factor = 1e3)
-    test_m, test_memcap = calculate_M_mat(DS_NEURON, solve = False)
+    test_m, test_memcap = calculate_M_mat(DS_NEURON, Rm, Ra, Cm, solve = False)
     test_m_solved = np.linalg.inv(sparse.csr_matrix.todense(test_m))
 
     # running PHATE
