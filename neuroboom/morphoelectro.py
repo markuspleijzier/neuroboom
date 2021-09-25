@@ -673,9 +673,16 @@ def compartmentalise_neuron(
                                                           synapse_type='post')
 
     # Which nodes are in the CA?
-    skeleton_in_roi = navis.in_volume(original_neuron.nodes[['x', 'y', 'z']].values, roi, inplace=False)
-    ds_isin = ds_neuron_synapse_to_node.node.isin(original_neuron.nodes[skeleton_in_roi].node_id.tolist())
-    roi_syn_con = ds_neuron_synapse_to_node[ds_isin].copy()
+
+    if roi is not None:
+
+        skeleton_in_roi = navis.in_volume(original_neuron.nodes[['x', 'y', 'z']].values, roi, inplace=False)
+        ds_isin = ds_neuron_synapse_to_node.node.isin(original_neuron.nodes[skeleton_in_roi].node_id.tolist())
+        roi_syn_con = ds_neuron_synapse_to_node[ds_isin].copy()
+
+    else:
+
+        roi_syn_con = ds_neuron_synapse_to_node.copy()
 
     #roi_syn_con = ds_neuron_synapse_to_node[ds_neuron_synapse_to_node.node.isin(
     #                    original_neuron.nodes[skeleton_in_roi].node_id.tolist())].copy()
@@ -701,5 +708,5 @@ def compartmentalise_neuron(
         return(original_neuron, ds_neuron, roi_syn_con, test_m, test_memcap)
 
     else:
-        
+
         return(original_neuron, ds_neuron, roi_syn_con)
