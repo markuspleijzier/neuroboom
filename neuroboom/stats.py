@@ -427,3 +427,86 @@ def permutation_test_complete(
         postsyn_pt = postsyn_pt[~postsyn_pt.partner_type.isnull()].copy()
 
     return (presyn_pt, postsyn_pt)
+
+
+def prefocality_to_dendrogram_coloring(
+    x: pd.DataFrame,
+    p_val: float,
+    neuron: navis.TreeNeuron
+):
+
+    """
+    Function to take the results of synaptic focality tests and create colour dict for highlighting connectors
+    """
+
+    x_thresh = x[x.p_val < p_val].copy()
+    partner_dict = dict(zip(x_thresh.partner_neuron, x_thresh.partner_type))
+
+    # fetching synapse connections
+    conn = nvneu.fetch_synapse_connections(source_criteria=neuron.id, target_criteria=x_thresh.partner_neuron.tolist())
+
+    # filtering for highly probably synapses
+    conn_thresh = conn[(conn.confidence_pre > 0.9) & (conn.confidence_post > 0.9)].copy()
+
+    pal = sns.color_palette('turbo', len(partner_dict))
+    pal_dict = dict(zip(partner_dict.keys(), pal))
+
+    nodes_matched = match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'pre')
+
+    c2n = dict(zip(nodes_matched.connector, nodes_matched.bodyId_post))
+    c2color = {i : pal_dict[c2n[i]] for i in c2n.keys()}
+
+
+    return(c2color, c2n, conn_thresh, partner_dict)
+
+
+def postfocality_to_dendrogram_coloring(
+    x: pd.DataFrame,
+    p_val: float,
+    neuron: navis.TreeNeuron
+):
+
+    """
+    Function to take the results of synaptic focality tests and create colour dict for plotting
+    """
+
+    x_thresh = x[x.p_val < p_val].copy()
+    partner_dict = dict(zip(x_thresh.partner_neuron, x_thresh.partner_type))
+
+    # fetching synapse connections
+    conn = nvneu.fetch_synapse_connections(target_criteria=neuron.id,
+                                           source_criteria=x_thresh.partner_neuron.tolist())
+
+    # filtering for highly probably synapses
+    conn_thresh = conn[(conn.confidence_pre > 0.9) & (conn.confidence_post > 0.9)].copy()
+
+    pal = sns.color_palette('turbo', len(partner_dict))
+    pal_dict = dict(zip(partner_dict.keys(), pal))
+
+    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'post')
+
+    c2n = dict(zip(nodes_matched.connector, nodes_matched.bodyId_pre))
+    c2color = {i : pal_dict[c2n[i]] for i in c2n.keys()}
+
+
+    return(c2color, c2n, conn_thresh, partner_dict)
+
+
+
+def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
+
+    neuron_to_color = {connector_to_neuron[i] : connector_to_color[i] for i in connector_to_color.keys()}
+
+    legend_elements = []
+
+    for i in range(len(neuron_to_color)):
+
+        neuron = list(neuron_to_color.keys())[i]
+
+        legend_elements.append(Line2D([i], [0], marker = 'o',
+                                      color = neuron_to_color[neuron],
+                                      label = f'{neuron} : {partner_dict[neuron]}',
+                                      markerfacecolor = neuron_to_color[neuron],
+                                      markersize = 60))
+
+    return(legend_elements)
