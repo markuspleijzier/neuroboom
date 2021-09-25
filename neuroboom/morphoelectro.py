@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from collections import Counter
 import itertools
+from itertools import chain
 
 import navis
 import navis.interfaces.neuprint as nvneu
@@ -643,7 +644,7 @@ def compartmentalise_neuron(neuron_id, Rm, Ra, Cm, roi):
 
     for i in unique_compartments:
 
-        nodes_to_permute = ds_neuron.nodes[ds_neuron.nodes_node_cluster == i].node_id.tolist()
+        nodes_to_permute = ds_neuron.nodes[ds_neuron.node_cluster == i].node_id.tolist()
 
         start_end = [i for i in itertools.permutations(nodes_to_permute, 2)]
 
