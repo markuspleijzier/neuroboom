@@ -12,6 +12,7 @@ import scipy.spatial.distance as ssd
 from collections import Counter
 import itertools
 import pymaid
+from neuroboom import utils as nbu
 
 
 def prepare_neuron(x, change_units = True, factor = 1e3):
@@ -35,7 +36,8 @@ def prepare_neuron(x, change_units = True, factor = 1e3):
         x.nodes.sort_values(by = ['node_rank'], ascending = True, inplace = True)
         x.nodes.reset_index(drop = True, inplace = True)
 
-        x = navis_calc_cable(x, return_skdata=True)
+        #x = navis_calc_cable(x, return_skdata=True)
+        x = nbu.calc_cable(x, return_skdata=True)
 
         if not change_units:
 
@@ -94,7 +96,7 @@ def prepare_neuron(x, change_units = True, factor = 1e3):
         raise ValueError('Need to pass either a Navis or a Catmaid neuron type!')
 
 
-def calculate_M_mat(x, solve = False):
+def calculate_M_mat(x, Rm, Ra, Cm, solve = False):
 
     if isinstance(x, (navis.TreeNeuron, navis.NeuronList)):
 
