@@ -18,6 +18,7 @@ import scprep
 import scipy.spatial.distance as ssd
 
 from neuroboom import utils as nbu
+from neuroboom import dendrogram as nbd
 
 
 def prepare_neuron(x,
