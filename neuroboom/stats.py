@@ -4,7 +4,7 @@
 import copy
 import random
 from collections import Counter
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import navis
 import navis.interfaces.neuprint as nvneu
@@ -451,7 +451,7 @@ def prefocality_to_dendrogram_coloring(
     pal = sns.color_palette('turbo', len(partner_dict))
     pal_dict = dict(zip(partner_dict.keys(), pal))
 
-    nodes_matched = match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'pre')
+    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'pre')
 
     c2n = dict(zip(nodes_matched.connector, nodes_matched.bodyId_post))
     c2color = {i : pal_dict[c2n[i]] for i in c2n.keys()}
@@ -510,3 +510,249 @@ def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
                                       markersize = 60))
 
     return(legend_elements)
+
+#####################
+## All By All synaptic Focality
+#####################
+
+# KS test
+
+def synaptic_focality_KS_test(
+    x: navis.TreeNeuron,
+    synapse_type: str = Union['pre','post'],
+    confidence_threshold: Tuple = (0.0, 0.9)
+):
+
+    if synapse_type == 'pre':
+
+        g_mat = navis.geodesic_matrix(x)
+
+        syn = nvneu.fetch_synapse_connections(source_criteria=x.id)
+        syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
+        syn = nbm.match_connectors_to_nodes(syn, x, synapse_type=synapse_type)
+
+        df = pd.DataFrame()
+        df['partner_id'] = syn.bodyId_post.unique()
+        partner_gt = {}
+        partner_statistic = {}
+        partner_pval = {}
+
+        for i, j in enumerate(df.partner_id):
+
+            nodes = syn[syn.bodyId_post == j].node.tolist()
+
+            truth_array = np.isin(g_mat.index, nodes)
+
+            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis = 1)
+
+            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis = 1)
+
+            partner_gt[j] = partner_geo_dist_vals
+
+            KS_test = ks_2samp(partner_geo_dist_vals, total_geo_dist_vals)
+
+            partner_statistic[j] = KS_test.statistic
+
+            partner_pval[j] = KS_test.pvalue
+
+        df['gT'] = df.partner_id.map(partner_gt)
+        df['KS statistic'] = df.partner_id.map(partner_statistic)
+        df['KS pval'] = df.partner_id.map(partner_pval)
+        df['n_syn'] = [len(i) for i in df.gT]
+
+
+    elif synapse_type == 'post':
+
+        g_mat = navis.geodesic_matrix(x)
+
+        syn = nvneu.fetch_synapse_connections(target_criteria = x.id)
+        syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
+        syn = nbm.match_connectors_to_nodes(syn, x, synapse_type=synapse_type)
+
+        df = pd.DataFrame()
+        df['partner_id'] = syn.bodyId_pre.unique()
+        partner_gt = {}
+        partner_statistic = {}
+        partner_pval = {}
+
+
+        for i, j in enumerate(df.partner_id):
+
+            nodes = syn[syn.bodyId_pre == j].node.tolist()
+
+            truth_array = np.isin(g_mat.index, nodes)
+
+            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis = 1)
+
+            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis = 1)
+
+            partner_gt[j] = partner_geo_dist_vals
+
+            KS_test = ks_2samp(partner_geo_dist_vals, total_geo_dist_vals)
+
+            partner_statistic[j] = KS_test.statistic
+
+            partner_pval[j] = KS_test.pvalue
+
+
+        df['gT'] = df.partner_id.map(partner_gt)
+        df['KS statistic'] = df.partner_id.map(partner_statistic)
+        df['KS pval'] = df.partner_id.map(partner_pval)
+        df['n_syn'] = [len(i) for i in df.gT]
+
+
+    return(df)
+
+##### permutation (enrichment analysis)
+
+def calculate_T_obs(
+    neuron_id: int,
+    neuron_to_node_dict: dict,
+    gmat: pd.DataFrame,
+    two_sample: bool = True):
+
+    Anodes_to_query = neuron_to_node_dict[neuron_id]
+    An = len(Anodes_to_query)
+
+    Bnodes_to_query = gmat.index[~np.isin(gmat.index, Anodes_to_query)].to_numpy()
+    Bn = len(Bnodes_to_query)
+
+    A_mean = gmat.loc[Anodes_to_query, :].mean().mean()
+    B_mean = gmat.loc[Bnodes_to_query, :].mean().mean()
+
+    T_obs = A_mean - B_mean
+
+    if two_sample:
+
+        T_obs = abs(T_obs)
+
+    return(T_obs, An, Bn)
+
+
+def random_draw_sample_dist(
+    n_iter: int,
+    gmat: pd.DataFrame,
+    T_obs: float,
+    An: int,
+    Bn: int
+):
+
+    A_draws = []
+    B_draws = []
+
+    for i in range(n_iter):
+
+        rc_A = np.random.choice(g_mat.index.to_numpy(), size = An, replace = False)
+        rc_B = np.random.choice(g_mat.index.to_numpy(), size = Bn, replace = False)
+
+        sample_mean_A = gmat.loc[rc_A, :].mean().mean()
+        sample_mean_B = gmat.loc[rc_B, :].mean().mean()
+
+        A_draws.append(sample_mean_A)
+        B_draws.append(sample_mean_B)
+
+    cart_prod = [i for i in itertools.product(A_draws, B_draws)]
+
+    sampled_permut_diff = abs(np.array([i - j for i, j in cart_prod]))
+
+    p_value = sum(sampled_permut_diff >= T_obs) / len(sampled_permut_diff)
+
+    return(p_value)
+
+
+
+def aba_presyn_focality(
+    neuron: navis.TreeNeuron,
+    confidence_threshold: Tuple = (0.0, 0.0),
+    n_iter: int = 100
+):
+
+    syn = nvneu.fetch_synapse_connections(source_criteria = neuron.id)
+    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidnece_post > confidence_threshold[1])].copy()
+
+    # syn_wmc = synaptic connections with connectors matched
+    syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='pre')
+
+    connector2node = dict(zip(neuron.connectors.connector_id, neuron.connectors.node_id))
+
+    syn_wmc['node'] = syn_wmc.connector.map(connector2node).to_numpy()
+
+    unique_usns = syn_wmc.bodyId_post.unique()
+
+    neuron_to_uNodes = {i : syn_wmc[syn_wmc.bodyId_post == i].node.unique() for i in unique_usns}
+
+    g_mat = navis.geodesic_matrix(neuron)
+
+    df = pd.DataFrame()
+    df['unique_ids'] = unique_usns
+    T_obs_list = []
+    An_list = []
+    Bn_list = []
+    rdsd_list = []
+
+    for i in unique_usns:
+
+        T_obs, An, Bn = calculate_T_obs(neuron_id = i,
+                                        neuron_to_node_dict = neuron_to_uNodes,
+                                        gmat = g_mat)
+
+        T_obs_list.append(T_obs)
+        An_list.append(An)
+        Bn_list.append(Bn)
+        rdsd_list = rdsd_list
+
+    df['T_obs'] = T_obs_list
+    df['An'] = An_list
+    df['Bn'] = Bn_list
+    df['rdsd'] = rdsd_list
+
+    return(df)
+
+def aba_postsyn_focality(
+    neuron: navis.TreeNeuron,
+    confidence_threshold: Tuple = (0.0, 0.0),
+    n_iter: int = 100
+):
+
+    syn = nvneu.fetch_synapse_connections(target_criteria = neuron.id)
+    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
+
+    # syn_wmc = synaptic connections with connectors matched
+    syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='post')
+
+    connector2node = dict(zip(neuron.connectors.connector_id, neuron.connectors.node_id))
+
+    syn_wmc['node'] = syn_wmc.connector.map(connector2node).to_numpy()
+
+    unique_usns = syn_wmc.bodyId_pre.unique()
+
+    neuron_to_uNodes = {i : syn_wmc[syn_wmc.bodyId_pre == i].node.unique() for i in unique_usns}
+
+    g_mat = navis.geodesic_matrix(neuron)
+
+    df = pd.DataFrame()
+    df['unique_ids'] = unique_usns
+    T_obs_list = []
+    An_list = []
+    Bn_list = []
+    rdsd_list = []
+
+    for i in unique_usns:
+
+        T_obs, An, Bn = calculate_T_obs(neuron_id=i,
+                                    neuron_to_node_dict=neuron_to_uNodes,
+                                    gmat=g_mat)
+
+        rdsd = random_draw_sample_dist(n_iter, g_mat, T_obs, An, Bn)
+
+        T_obs_list.append(T_obs)
+        An_list.append(An)
+        Bn_list.append(Bn)
+        rdsd_list.append(rdsd)
+
+    df['T_obs'] = T_obs_list
+    df['An'] = An_list
+    df['Bn'] = Bn_list
+    df['rdsd'] = rdsd_list
+
+    return(df)
