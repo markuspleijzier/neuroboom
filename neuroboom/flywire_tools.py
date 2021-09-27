@@ -1,11 +1,12 @@
-import pymaid
 import navis
 from tqdm import tqdm
 from random import randrange
-import fafbseg
 import cloudvolume
 import time
-from typing import Optional, Union, Any, List, Tuple
+from typing import Union, Tuple
+import numpy as np
+from itertools import chain
+
 
 def random_sample_from_volume(
     volume: navis.Volume,
@@ -28,7 +29,8 @@ def random_sample_from_volume(
     ----------
 
     volume: a navis.Volume object retrieved either through FAFB14 or Janelia Hemibrain.
-                If the latter, then you need to transform the volume into flywire space using a bridging transformation before using this function
+                If the latter, then you need to transform the volume into flywire
+                space using a bridging transformation before using this function
 
     mip_level: the mip resolution level.
                 Available resolutions are (16, 16, 40), (32, 32, 40), (64, 64, 40).
@@ -39,8 +41,11 @@ def random_sample_from_volume(
 
     bbox_dim: dimension of the query cube - small values (<100) are encouraged.
 
-    supervoxels: A supervoxel cloudvolume.Volume object specifying the supervoxel instance you are querying.
-                e.g. cloudvolume.CloudVolume("precomputed://https://s3-hpcrc.rc.princeton.edu/fafbv14-ws/ws_190410_FAFB_v02_ws_size_threshold_200", mip=mip_level)
+    supervoxels: A supervoxel cloudvolume.Volume object
+                specifying the supervoxel instance you are querying.
+
+    e.g. cloudvolume.CloudVolume("precomputed://https://s3-hpcrc.rc.princeton.edu/fafbv14-ws/ws_190410_FAFB_v02_ws_size_threshold_200",
+                                mip=mip_level)
 
     segmentation: A segmentation cloudvolume.Volume object specifying the segmentation instance you are querying.
                 e.g. cloudvolume.CloudVolume("graphene://https://prodv1.flywire-daf.com/segmentation/table/fly_v31")
@@ -118,7 +123,8 @@ def random_sample_from_volume(
 
     # How many randomly generated points are in the volume?
     in_vol = navis.in_volume(xyz_arr, volume)
-    print(f"Of {n_point_string} random points generated, {xyz_arr[in_vol].shape[0] / n_points * 1e2 :.2f}% of them are in the volume. This equals {xyz_arr[in_vol].shape[0]} points. \n")
+    print(f"""Of {n_point_string} random points generated, {xyz_arr[in_vol].shape[0] / n_points * 1e2 :.2f}% of them are in the volume.""")
+    print(f"""This equals {xyz_arr[in_vol].shape[0]} points. \n""")
     xyz_in_vol = xyz_arr[in_vol]
 
     # generating query cubes
@@ -140,7 +146,7 @@ def random_sample_from_volume(
 
         if amount_to_query == 1.0:
 
-            print(f'You are using 100% of the randomly generated points - this can take a long time to complete.')
+            print('You are using 100% of the randomly generated points - this can take a long time to complete.')
 
         n_query = int(len(xyz_start) * amount_to_query)
 
@@ -156,7 +162,6 @@ def random_sample_from_volume(
             q = supervoxels[xyz_start[i][0]: xyz_end[i][0],
                             xyz_start[i][1]: xyz_end[i][1],
                             xyz_start[i][2]: xyz_end[i][2]]
-
 
             supervoxel_ids.append(q)
 
@@ -175,9 +180,9 @@ def random_sample_from_volume(
 
         for i in range(amount_to_query):
 
-            q = supervoxels[xyz_start[i][0] : xyz_end[i][0],
-                            xyz_start[i][1] : xyz_end[i][1],
-                            xyz_start[i][2] : xyz_end[i][2]]
+            q = supervoxels[xyz_start[i][0]: xyz_end[i][0],
+                            xyz_start[i][1]: xyz_end[i][1],
+                            xyz_start[i][2]: xyz_end[i][2]]
 
             supervoxel_ids.append(q)
 

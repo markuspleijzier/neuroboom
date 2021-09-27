@@ -38,7 +38,7 @@ def prepare_neuron(
                 x = x[0]
 
         node_sort = dict([(i, k) for i, k in zip(range(len(x.nodes)), navis.graph_utils.node_label_sorting(x))])
-        node_sort_rev = {i:j for j, i in node_sort.items()}
+        node_sort_rev = {i: j for j, i in node_sort.items()}
         navis.downsample_neuron(x, downsampling_factor=float('inf'), inplace=True)
         x.nodes['node_rank'] = x.nodes.node_id.map(node_sort_rev).tolist()
         x.nodes.sort_values(by=['node_rank'], ascending=True, inplace=True)
@@ -74,7 +74,7 @@ def prepare_neuron(
                 x = x[0]
 
         node_sort = dict([(i, k) for i, k in zip(range(len(x.nodes)), pymaid.node_label_sorting(x))])
-        node_sort_rev = {i:j for j, i in node_sort.items()}
+        node_sort_rev = {i: j for j, i in node_sort.items()}
         x = pymaid.downsample_neuron(x, resampling_factor=float('inf'))
         x = pymaid.guess_radius(x)
 
@@ -684,7 +684,7 @@ def compartmentalise_neuron(
 
         roi_syn_con = ds_neuron_synapse_to_node.copy()
 
-    #roi_syn_con = ds_neuron_synapse_to_node[ds_neuron_synapse_to_node.node.isin(
+    # roi_syn_con = ds_neuron_synapse_to_node[ds_neuron_synapse_to_node.node.isin(
     #                    original_neuron.nodes[skeleton_in_roi].node_id.tolist())].copy()
 
     a, b = nvneu.fetch_neurons(roi_syn_con.bodyId_pre.unique())

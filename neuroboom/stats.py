@@ -11,9 +11,14 @@ import navis.interfaces.neuprint as nvneu
 import numpy as np
 import pandas as pd
 from scipy import stats
+from scipy.stats import ks_2samp
 from tqdm import tqdm
+import itertools
+import seaborn as sns
+from matplotlib.lines import Line2D
 
 from neuroboom.utils import check_valid_neuron_input
+from neuroboom import morphoelectro as nbm
 
 
 def presynapse_focality(
@@ -451,10 +456,10 @@ def prefocality_to_dendrogram_coloring(
     pal = sns.color_palette('turbo', len(partner_dict))
     pal_dict = dict(zip(partner_dict.keys(), pal))
 
-    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'pre')
+    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type='pre')
 
     c2n = dict(zip(nodes_matched.connector, nodes_matched.bodyId_post))
-    c2color = {i : pal_dict[c2n[i]] for i in c2n.keys()}
+    c2color = {i: pal_dict[c2n[i]] for i in c2n.keys()}
 
 
     return(c2color, c2n, conn_thresh, partner_dict)
@@ -495,7 +500,7 @@ def postfocality_to_dendrogram_coloring(
 
 def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
 
-    neuron_to_color = {connector_to_neuron[i] : connector_to_color[i] for i in connector_to_color.keys()}
+    neuron_to_color = {connector_to_neuron[i]: connector_to_color[i] for i in connector_to_color.keys()}
 
     legend_elements = []
 
@@ -503,11 +508,11 @@ def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
 
         neuron = list(neuron_to_color.keys())[i]
 
-        legend_elements.append(Line2D([i], [0], marker = 'o',
-                                      color = neuron_to_color[neuron],
-                                      label = f'{neuron} : {partner_dict[neuron]}',
-                                      markerfacecolor = neuron_to_color[neuron],
-                                      markersize = 60))
+        legend_elements.append(Line2D([i], [0], marker='o',
+                                        color=neuron_to_color[neuron],
+                                        label=f'{neuron} : {partner_dict[neuron]}',
+                                        markerfacecolor=neuron_to_color[neuron],
+                                        markersize=60))
 
     return(legend_elements)
 
@@ -519,7 +524,7 @@ def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
 
 def synaptic_focality_KS_test(
     x: navis.TreeNeuron,
-    synapse_type: str = Union['pre','post'],
+    synapse_type: str = 'pre',
     confidence_threshold: Tuple = (0.0, 0.9)
 ):
 
@@ -543,9 +548,9 @@ def synaptic_focality_KS_test(
 
             truth_array = np.isin(g_mat.index, nodes)
 
-            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis = 1)
+            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis=1)
 
-            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis = 1)
+            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis=1)
 
             partner_gt[j] = partner_geo_dist_vals
 
@@ -565,7 +570,7 @@ def synaptic_focality_KS_test(
 
         g_mat = navis.geodesic_matrix(x)
 
-        syn = nvneu.fetch_synapse_connections(target_criteria = x.id)
+        syn = nvneu.fetch_synapse_connections(target_criteria=x.id)
         syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
         syn = nbm.match_connectors_to_nodes(syn, x, synapse_type=synapse_type)
 
@@ -575,16 +580,15 @@ def synaptic_focality_KS_test(
         partner_statistic = {}
         partner_pval = {}
 
-
         for i, j in enumerate(df.partner_id):
 
             nodes = syn[syn.bodyId_pre == j].node.tolist()
 
             truth_array = np.isin(g_mat.index, nodes)
 
-            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis = 1)
+            partner_geo_dist_vals = g_mat[truth_array].values.mean(axis=1)
 
-            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis = 1)
+            total_geo_dist_vals = g_mat[~truth_array].values.mean(axis=1)
 
             partner_gt[j] = partner_geo_dist_vals
 
@@ -603,7 +607,8 @@ def synaptic_focality_KS_test(
 
     return(df)
 
-##### permutation (enrichment analysis)
+# permutation (enrichment analysis)
+
 
 def calculate_T_obs(
     neuron_id: int,
@@ -642,8 +647,8 @@ def random_draw_sample_dist(
 
     for i in range(n_iter):
 
-        rc_A = np.random.choice(g_mat.index.to_numpy(), size = An, replace = False)
-        rc_B = np.random.choice(g_mat.index.to_numpy(), size = Bn, replace = False)
+        rc_A = np.random.choice(gmat.index.to_numpy(), size=An, replace=False)
+        rc_B = np.random.choice(gmat.index.to_numpy(), size=Bn, replace=False)
 
         sample_mean_A = gmat.loc[rc_A, :].mean().mean()
         sample_mean_B = gmat.loc[rc_B, :].mean().mean()
@@ -660,14 +665,13 @@ def random_draw_sample_dist(
     return(p_value)
 
 
-
 def aba_presyn_focality(
     neuron: navis.TreeNeuron,
     confidence_threshold: Tuple = (0.0, 0.0),
     n_iter: int = 100
 ):
 
-    syn = nvneu.fetch_synapse_connections(source_criteria = neuron.id)
+    syn = nvneu.fetch_synapse_connections(source_criteria=neuron.id)
     syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidnece_post > confidence_threshold[1])].copy()
 
     # syn_wmc = synaptic connections with connectors matched
@@ -679,54 +683,7 @@ def aba_presyn_focality(
 
     unique_usns = syn_wmc.bodyId_post.unique()
 
-    neuron_to_uNodes = {i : syn_wmc[syn_wmc.bodyId_post == i].node.unique() for i in unique_usns}
-
-    g_mat = navis.geodesic_matrix(neuron)
-
-    df = pd.DataFrame()
-    df['unique_ids'] = unique_usns
-    T_obs_list = []
-    An_list = []
-    Bn_list = []
-    rdsd_list = []
-
-    for i in unique_usns:
-
-        T_obs, An, Bn = calculate_T_obs(neuron_id = i,
-                                        neuron_to_node_dict = neuron_to_uNodes,
-                                        gmat = g_mat)
-
-        T_obs_list.append(T_obs)
-        An_list.append(An)
-        Bn_list.append(Bn)
-        rdsd_list = rdsd_list
-
-    df['T_obs'] = T_obs_list
-    df['An'] = An_list
-    df['Bn'] = Bn_list
-    df['rdsd'] = rdsd_list
-
-    return(df)
-
-def aba_postsyn_focality(
-    neuron: navis.TreeNeuron,
-    confidence_threshold: Tuple = (0.0, 0.0),
-    n_iter: int = 100
-):
-
-    syn = nvneu.fetch_synapse_connections(target_criteria = neuron.id)
-    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
-
-    # syn_wmc = synaptic connections with connectors matched
-    syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='post')
-
-    connector2node = dict(zip(neuron.connectors.connector_id, neuron.connectors.node_id))
-
-    syn_wmc['node'] = syn_wmc.connector.map(connector2node).to_numpy()
-
-    unique_usns = syn_wmc.bodyId_pre.unique()
-
-    neuron_to_uNodes = {i : syn_wmc[syn_wmc.bodyId_pre == i].node.unique() for i in unique_usns}
+    neuron_to_uNodes = {i: syn_wmc[syn_wmc.bodyId_post == i].node.unique() for i in unique_usns}
 
     g_mat = navis.geodesic_matrix(neuron)
 
@@ -740,8 +697,56 @@ def aba_postsyn_focality(
     for i in unique_usns:
 
         T_obs, An, Bn = calculate_T_obs(neuron_id=i,
-                                    neuron_to_node_dict=neuron_to_uNodes,
-                                    gmat=g_mat)
+                                        neuron_to_node_dict=neuron_to_uNodes,
+                                        gmat=g_mat)
+
+        T_obs_list.append(T_obs)
+        An_list.append(An)
+        Bn_list.append(Bn)
+        rdsd_list = rdsd_list
+
+    df['T_obs'] = T_obs_list
+    df['An'] = An_list
+    df['Bn'] = Bn_list
+    df['rdsd'] = rdsd_list
+
+    return(df)
+
+
+def aba_postsyn_focality(
+    neuron: navis.TreeNeuron,
+    confidence_threshold: Tuple = (0.0, 0.0),
+    n_iter: int = 100
+):
+
+    syn = nvneu.fetch_synapse_connections(target_criteria=neuron.id)
+    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
+
+    # syn_wmc = synaptic connections with connectors matched
+    syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='post')
+
+    connector2node = dict(zip(neuron.connectors.connector_id, neuron.connectors.node_id))
+
+    syn_wmc['node'] = syn_wmc.connector.map(connector2node).to_numpy()
+
+    unique_usns = syn_wmc.bodyId_pre.unique()
+
+    neuron_to_uNodes = {i: syn_wmc[syn_wmc.bodyId_pre == i].node.unique() for i in unique_usns}
+
+    g_mat = navis.geodesic_matrix(neuron)
+
+    df = pd.DataFrame()
+    df['unique_ids'] = unique_usns
+    T_obs_list = []
+    An_list = []
+    Bn_list = []
+    rdsd_list = []
+
+    for i in unique_usns:
+
+        T_obs, An, Bn = calculate_T_obs(neuron_id=i,
+                                        neuron_to_node_dict=neuron_to_uNodes,
+                                        gmat=g_mat)
 
         rdsd = random_draw_sample_dist(n_iter, g_mat, T_obs, An, Bn)
 
