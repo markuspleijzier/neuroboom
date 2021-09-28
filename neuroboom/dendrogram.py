@@ -283,10 +283,25 @@ def plot_dendrogram(
 
     if downsample_neuron > 0:
         print("Downsampling neuron, factor = {}".format(downsample_neuron))
+
+        nodes_to_keep = []
+
+        if highlight_nodes is not None:
+
+            node_list = list(highlight_nodes.keys())
+
+            nodes_to_keep.append(node_list)
+
+        else:
+
+            nodes_to_keep.append(x.connectors.node_id.unique().tolist())
+
+        nodes_to_keep = list(chain.from_iterable(node_list)
+
         x = navis.downsample_neuron(
             x,
             downsampling_factor=downsample_neuron,
-            preserve_nodes=x.connectors.node_id.unique().tolist(),
+            preserve_nodes=nodes_to_keep
         )
 
     if "parent_dist" not in x.nodes:
