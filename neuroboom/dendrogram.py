@@ -296,7 +296,7 @@ def plot_dendrogram(
 
             nodes_to_keep.append(x.connectors.node_id.unique().tolist())
 
-        nodes_to_keep = list(chain.from_iterable(node_list))
+        nodes_to_keep = list(chain.from_iterable(nodes_to_keep))
 
         x = navis.downsample_neuron(
             x,
