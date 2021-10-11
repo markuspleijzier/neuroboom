@@ -282,6 +282,7 @@ def plot_dendrogram(
         x.connectors = x.connectors[x.connectors.connector_id.isin(connectors_included)]
 
     if downsample_neuron > 0:
+        
         print("Downsampling neuron, factor = {}".format(downsample_neuron))
 
         nodes_to_keep = []
