@@ -70,25 +70,18 @@ def presynapse_focality(
         source_criteria=x.id
     )
     synapse_connections.astype(object)
-    synapse_connections["node_id"] = object
-
-    for i, j in tqdm(
-        enumerate(synapse_connections[["x_pre", "y_pre", "z_pre"]].values)
-    ):
-
-        equals = np.equal(j, x.presynapses[["x", "y", "z"]].values)
-        all_equals = [np.all(k) for k in equals]
-        node_id = x.presynapses[all_equals].node_id.tolist()
-        synapse_connections.at[i, "node_id"] = node_id
+    synapse_connections = nbm.match_connectors_to_nodes(synapse_connections,
+                                                        x,
+                                                        synapse_type = 'pre')
 
     truth_list = [
         True if len(np.unique(i)) > 1 else False
-        for i in synapse_connections.node_id.values
+        for i in synapse_connections.node.values
     ]
     if synapse_connections[truth_list].shape[0] == 0:
 
-        synapse_connections.node_id = [
-            np.unique(k)[0] for k in synapse_connections.node_id.tolist()
+        synapse_connections.node = [
+            np.unique(k)[0] for k in synapse_connections.node.tolist()
         ]
 
     else:
@@ -168,26 +161,19 @@ def postsynapse_focality(
         target_criteria=x.id
     )
     synapse_connections.astype(object)
-    synapse_connections["node_id"] = object
-
-    for i, j in tqdm(
-        enumerate(synapse_connections[["x_post", "y_post", "z_post"]].values)
-    ):
-
-        node_id = x.postsynapses[
-            [np.all(k) for k in np.equal(j, x.postsynapses[["x", "y", "z"]].values)]
-        ].node_id.tolist()
-        synapse_connections.at[i, "node_id"] = node_id
+    synapse_connections = nbm.match_connectors_to_nodes(synapse_connections,
+                                                        x,
+                                                        synapse_type = 'post')
 
     the_truth = [
         True if len(np.unique(i)) > 1 else False
-        for i in synapse_connections.node_id.values
+        for i in synapse_connections.node.values
     ]
 
     if synapse_connections[the_truth].shape[0] == 0:
 
-        synapse_connections.node_id = [
-            np.unique(k)[0] for k in synapse_connections.node_id.tolist()
+        synapse_connections.node = [
+            np.unique(k)[0] for k in synapse_connections.node.tolist()
         ]
 
     else:
@@ -281,14 +267,14 @@ def permut_test(
                 ~geo_mat.index.isin(
                     synapse_connections[
                         synapse_connections.bodyId_post == j
-                    ].node_id.tolist()
+                    ].node.tolist()
                 )
             ]
             specific_distribution = geo_mat[
                 geo_mat.index.isin(
                     synapse_connections[
                         synapse_connections.bodyId_post == j
-                    ].node_id.tolist()
+                    ].node.tolist()
                 )
             ]
 
@@ -298,14 +284,14 @@ def permut_test(
                 ~geo_mat.index.isin(
                     synapse_connections[
                         synapse_connections.bodyId_pre == j
-                    ].node_id.tolist()
+                    ].node.tolist()
                 )
             ]
             specific_distribution = geo_mat[
                 geo_mat.index.isin(
                     synapse_connections[
                         synapse_connections.bodyId_pre == j
-                    ].node_id.tolist()
+                    ].node.tolist()
                 )
             ]
 
