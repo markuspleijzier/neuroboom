@@ -511,7 +511,7 @@ def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
 def synaptic_focality_KS_test(
     x: navis.TreeNeuron,
     synapse_type: str = 'pre',
-    confidence_threshold: Tuple = (0.0, 0.9)
+    confidence_threshold: Tuple = (0.9, 0.9)
 ):
 
     if synapse_type == 'pre':
@@ -658,7 +658,7 @@ def aba_presyn_focality(
 ):
 
     syn = nvneu.fetch_synapse_connections(source_criteria=neuron.id)
-    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidnece_post > confidence_threshold[1])].copy()
+    syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
 
     # syn_wmc = synaptic connections with connectors matched
     syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='pre')
