@@ -8,6 +8,8 @@ neuroboom
 .. image:: https://img.shields.io/pypi/v/neuroboom.svg
         :target: https://pypi.python.org/pypi/neuroboom
 
+.. image:: https://static.pepy.tech/personalized-badge/neuroboom?period=month&units=international_system&left_color=black&right_color=orange&left_text=Downloads
+ :target: https://pepy.tech/project/neuroboom
 
 .. image:: /docs/source/_static/logos/nb_large_landing.png
         :width: 1200
