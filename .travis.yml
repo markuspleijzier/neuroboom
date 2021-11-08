@@ -18,7 +18,7 @@ install:
   # Install this package and the packages listed in requirements.txt.
   - pip install -U pip
   - pip install -U setuptools
-  - pip install coveralls
+  - pip install coveralls==4.5.4
   - pip install pytest-cov # to get coverage report
   - pip install .
   # Install extra requirements for running tests and building docs.
