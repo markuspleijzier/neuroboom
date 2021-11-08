@@ -72,7 +72,7 @@ def presynapse_focality(
     synapse_connections.astype(object)
     synapse_connections = nbm.match_connectors_to_nodes(synapse_connections,
                                                         x,
-                                                        synapse_type = 'pre')
+                                                        synapse_type='pre')
 
     truth_list = [
         True if len(np.unique(i)) > 1 else False
@@ -163,7 +163,7 @@ def postsynapse_focality(
     synapse_connections.astype(object)
     synapse_connections = nbm.match_connectors_to_nodes(synapse_connections,
                                                         x,
-                                                        synapse_type = 'post')
+                                                        synapse_type='post')
 
     the_truth = [
         True if len(np.unique(i)) > 1 else False
@@ -434,7 +434,8 @@ def prefocality_to_dendrogram_coloring(
     partner_dict = dict(zip(x_thresh.partner_neuron, x_thresh.partner_type))
 
     # fetching synapse connections
-    conn = nvneu.fetch_synapse_connections(source_criteria=neuron.id, target_criteria=x_thresh.partner_neuron.tolist())
+    conn = nvneu.fetch_synapse_connections(source_criteria=neuron.id,
+                            target_criteria=x_thresh.partner_neuron.tolist())
 
     # filtering for highly probably synapses
     conn_thresh = conn[(conn.confidence_pre > 0.9) & (conn.confidence_post > 0.9)].copy()
@@ -449,7 +450,6 @@ def prefocality_to_dendrogram_coloring(
 
 
     return(c2color, c2n, conn_thresh, partner_dict)
-
 
 def postfocality_to_dendrogram_coloring(
     x: pd.DataFrame,
@@ -474,14 +474,12 @@ def postfocality_to_dendrogram_coloring(
     pal = sns.color_palette('turbo', len(partner_dict))
     pal_dict = dict(zip(partner_dict.keys(), pal))
 
-    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type = 'post')
+    nodes_matched = nbm.match_connectors_to_nodes(conn_thresh, neuron, synapse_type='post')
 
     c2n = dict(zip(nodes_matched.connector, nodes_matched.bodyId_pre))
-    c2color = {i : pal_dict[c2n[i]] for i in c2n.keys()}
-
+    c2color = {i: pal_dict[c2n[i]] for i in c2n.keys()}
 
     return(c2color, c2n, conn_thresh, partner_dict)
-
 
 
 def make_legend_elements(connector_to_color, connector_to_neuron, partner_dict):
