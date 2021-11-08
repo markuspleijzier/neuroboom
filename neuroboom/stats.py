@@ -686,10 +686,12 @@ def aba_presyn_focality(
                                         neuron_to_node_dict=neuron_to_uNodes,
                                         gmat=g_mat)
 
+        rdsd = random_draw_sample_dist(n_iter, g_mat, T_obs, An, Bn)
+
         T_obs_list.append(T_obs)
         An_list.append(An)
         Bn_list.append(Bn)
-        rdsd_list = rdsd_list
+        rdsd_list.append(rdsd)
 
     df['T_obs'] = T_obs_list
     df['An'] = An_list
