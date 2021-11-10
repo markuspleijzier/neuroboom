@@ -5,6 +5,7 @@ from typing import List, Optional
 import navis
 import navis.interfaces.neuprint as nvneu
 import pandas as pd
+from neuroboom import morphoelectro as nbm
 
 # Create an adjacency matrix from synapse connections (neuprint)
 
@@ -115,3 +116,115 @@ def adjx_from_syn_conn(
         df.index = [partner_type_dict[i] for i in df.index]
 
     return (df, partner_type_dict)
+
+#### Labelling connection types (e.g. Axo-dendritic etc.)
+
+def node_to_compartment_type(
+    x: navis.TreeNeuron,
+    split_neuron: navis.NeuronList
+):
+
+    for i, j in enumerate(x.nodes.node_id):
+
+        if np.isin(j, split_neuron[0].nodes.node_id):
+
+            compartment = split_neuron[0].compartment
+
+            x.nodes.loc[i, 'compartment'] = compartment
+
+        elif np.isin(j, split_neuron[1].nodes.node_id):
+
+            compartment = split_neuron[1].compartment
+
+            x.nodes.loc[i, 'compartment'] = compartment
+
+        elif np.isin(j, split_neuron[2].nodes.node_id):
+
+            compartment = split_neuron[2].compartment
+
+            x.nodes.loc[i, 'compartment'] = compartment
+
+        elif np.isin(j, split_neuron[3].nodes.node_id):
+
+            compartment = split_neuron[3].compartment
+
+            x.nodes.loc[i, 'compartment'] = compartment
+
+        else:
+
+            x.nodes.loc[i, 'compartment'] = 'missing'
+
+    if any(x.nodes.compartment.isnull()):
+
+        assert "There are nodes which are not assigned to a compartment!!"
+
+    else:
+
+        return(x)
+
+
+
+def find_connection_types(
+    n: navis.TreeNeuron,
+    split: navis.NeuronList,
+    syn_con: pd.DataFrame,
+    synapse_type: str = 'pre',
+    metric: str = 'flow_centrality',
+    disable_progress: bool = False
+):
+
+    syn_con = nbm.match_connectors_to_nodes(syn_con, n, synapse_type = synapse_type)
+
+    n_copy = node_to_compartment_type(n, split)
+
+    n2comp = dict(zip(n_copy.nodes.node_id, n_copy.nodes.compartment))
+
+    if synapse_type == 'pre':
+
+        syn_con['pre_node_type'] = syn_con.node.map(n2comp)
+
+        ind_to_compart_post = {}
+
+        for i in tqdm(syn_con.bodyId_post.unique(), disable = disable_progress):
+
+            post_n = nvneu.fetch_skeletons(i, heal = True)[0]
+            post_split = navis.split_axon_dendrite(n, metric = metric)
+            post_n_copy = node_to_compartment_type(post_n, post_split)
+
+            post_n2comp = dict(zip(post_n_copy.nodes.node_id, post_n_copy.nodes.compartment))
+            sub = syn_con[syn_con.bodyId_post == i].copy()
+            sub_matched = nbm.match_connectors_to_nodes(sub, post_n_copy, synapse_type = 'post')
+
+            tmp_comp = [post_n2comp[i] for i in sub_matched.node]
+            ind_comp = dict(zip(list(sub_matched.index), tmp_comp))
+
+            ind_to_compart_post.update(ind_comp)
+
+        syn_con['post_node_type'] = list(syn_con.index.map(ind_to_compart_post))
+
+    elif synapse_type == 'post':
+
+        syn_con['post_node_type'] = syn_con.node.map(n2comp)
+
+        ind_to_compart_pre = {}
+
+        for i in tqdm(syn_con.bodyId_pre.unique(), disable = disable_progress):
+
+            pre_n = nvneu.fetch_skeletons(i, heal = True)[0]
+            pre_split = navis.split_axon_dendrite(n, metric = metric)
+            pre_n_copy = node_to_compartment_type(pre_n, pre_split)
+
+            pre_n2comp = dict(zip(pre_n_copy.nodes.node_id, pre_n_copy.nodes.compartment))
+            sub = syn_con[syn_con.bodyId_pre == i].copy()
+            sub_matched = nbm.match_connectors_to_nodes(sub, pre_n_copy, synapse_type = 'pre')
+
+            tmp_comp = [pre_n2comp[i] for i in sub_matched.node]
+            ind_comp = dict(zip(list(sub_matched.index), tmp_comp))
+
+            ind_to_compart_pre.update(ind_comp)
+
+        syn_con['pre_node_type'] = list(syn_con.index.map(ind_to_compart_pre))
+
+    syn_con['connection_type'] = syn_con[['pre_node_type','post_node_type']].agg('-'.join, axis = 1)
+
+    return(syn_con)
