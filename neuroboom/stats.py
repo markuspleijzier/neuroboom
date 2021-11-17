@@ -652,12 +652,20 @@ def random_draw_sample_dist(
 def aba_presyn_focality(
     neuron: navis.TreeNeuron,
     confidence_threshold: Tuple = (0.0, 0.0),
-    n_iter: int = 100
+    n_iter: int = 100,
+    syn_thresh: int = 1,
 ):
-
+    print('Fetching synaptic connections...')
     syn = nvneu.fetch_synapse_connections(source_criteria=neuron.id)
+
+    print('Thresholding synapses by confidences...')
     syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
 
+    print('Thresholding synapses by synapse count...')
+    count_dict = dict(Counter(syn.bodyId_post).most_common())
+    syn = syn[[count_dict[i] > syn_thresh for i in syn.bodyId_post]].copy()
+
+    print('Matching connections to nodes...')
     # syn_wmc = synaptic connections with connectors matched
     syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='pre')
 
@@ -669,6 +677,7 @@ def aba_presyn_focality(
 
     neuron_to_uNodes = {i: syn_wmc[syn_wmc.bodyId_post == i].node.unique() for i in unique_usns}
 
+    print('Calculating all by all geodesic matrix for nodes...')
     g_mat = navis.geodesic_matrix(neuron)
 
     df = pd.DataFrame()
@@ -678,6 +687,7 @@ def aba_presyn_focality(
     Bn_list = []
     rdsd_list = []
 
+    print('Calculating T obs and drawing from random samples...')
     for i in unique_usns:
 
         T_obs, An, Bn = calculate_T_obs(neuron_id=i,
@@ -702,12 +712,21 @@ def aba_presyn_focality(
 def aba_postsyn_focality(
     neuron: navis.TreeNeuron,
     confidence_threshold: Tuple = (0.0, 0.0),
-    n_iter: int = 100
+    n_iter: int = 100,
+    syn_thresh: int = 1
 ):
 
+    print('Fetching synaptic connections...')
     syn = nvneu.fetch_synapse_connections(target_criteria=neuron.id)
+
+    print('Thresholding synapses by confidences...')
     syn = syn[(syn.confidence_pre > confidence_threshold[0]) & (syn.confidence_post > confidence_threshold[1])].copy()
 
+    print('Thresholding synapses by synapse count...')
+    count_dict = dict(Counter(syn.bodyId_pre).most_common())
+    syn = syn[[count_dict[i] > syn_thresh for i in syn.bodyId_pre]].copy()
+
+    print('Matching connections to nodes...')
     # syn_wmc = synaptic connections with connectors matched
     syn_wmc = nbm.match_connectors_to_nodes(syn, neuron, synapse_type='post')
 
@@ -719,6 +738,7 @@ def aba_postsyn_focality(
 
     neuron_to_uNodes = {i: syn_wmc[syn_wmc.bodyId_pre == i].node.unique() for i in unique_usns}
 
+    print('Calculating all by all geodesic matrix for nodes...')
     g_mat = navis.geodesic_matrix(neuron)
 
     df = pd.DataFrame()
@@ -728,6 +748,7 @@ def aba_postsyn_focality(
     Bn_list = []
     rdsd_list = []
 
+    print('Calculating T obs and drawing from random samples...')
     for i in unique_usns:
 
         T_obs, An, Bn = calculate_T_obs(neuron_id=i,
