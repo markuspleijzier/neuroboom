@@ -618,35 +618,69 @@ def calculate_T_obs(
     return(T_obs, An, Bn)
 
 
+# def random_draw_sample_dist(
+#     n_iter: int,
+#     gmat: pd.DataFrame,
+#     T_obs: float,
+#     An: int,
+#     Bn: int
+# ):
+#
+#     A_draws = []
+#     B_draws = []
+#
+#     for i in range(n_iter):
+#
+#         rc_A = np.random.choice(gmat.index.to_numpy(), size=An, replace=False)
+#         rc_B = np.random.choice(gmat.index.to_numpy(), size=Bn, replace=False)
+#
+#         sample_mean_A = gmat.loc[rc_A, :].mean().mean()
+#         sample_mean_B = gmat.loc[rc_B, :].mean().mean()
+#
+#         A_draws.append(sample_mean_A)
+#         B_draws.append(sample_mean_B)
+#
+#     cart_prod = [i for i in itertools.product(A_draws, B_draws)]
+#
+#     sampled_permut_diff = abs(np.array([i - j for i, j in cart_prod]))
+#
+#     p_value = sum(sampled_permut_diff >= T_obs) / len(sampled_permut_diff)
+#
+#     return(p_value)
+
 def random_draw_sample_dist(
-    n_iter: int,
-    gmat: pd.DataFrame,
-    T_obs: float,
-    An: int,
-    Bn: int
+            n_iter: int,
+            gmat: pd.DataFrame,
+            T_obs: float,
+            An: int,
+            Bn: int,
 ):
 
-    A_draws = []
-    B_draws = []
+    rc_A_lst = np.array([
+            np.random.choice(
+            gmat.index,
+            size = An,
+            replace = False) for i in range(n_iter)])
 
-    for i in range(n_iter):
+    rc_B_lst = np.array([
+            np.random.choice(
+            gmat.index,
+            size = Bn,
+            replace = False) for i in range(n_iter)])
 
-        rc_A = np.random.choice(gmat.index.to_numpy(), size=An, replace=False)
-        rc_B = np.random.choice(gmat.index.to_numpy(), size=Bn, replace=False)
+    rc_A_lst = rc_A_lst - 1
+    rc_B_lst = rc_B_lst - 1
 
-        sample_mean_A = gmat.loc[rc_A, :].mean().mean()
-        sample_mean_B = gmat.loc[rc_B, :].mean().mean()
+    sample_means_A = [gmat.values[i, :].mean().mean() for i in rc_A_lst]
+    sample_means_B = [gmat.values[i, :].mean().mean() for i in rc_B_lst]
 
-        A_draws.append(sample_mean_A)
-        B_draws.append(sample_mean_B)
-
-    cart_prod = [i for i in itertools.product(A_draws, B_draws)]
+    cart_prod = [i for i in itertools.product(sample_means_A, sample_means_B)]
 
     sampled_permut_diff = abs(np.array([i - j for i, j in cart_prod]))
 
-    p_value = sum(sampled_permut_diff >= T_obs) / len(sampled_permut_diff)
+    p_val = sum(sampled_permut_diff >= T_obs) / len(sampled_permut_diff)
 
-    return(p_value)
+    return(p_val)
 
 
 def aba_presyn_focality(
