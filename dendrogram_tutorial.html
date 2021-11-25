@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial for making Dendrograms &mdash; Neuroboom 0.3.51 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release History" href="release-history.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Neuroboom
+          </a>
+              <div class="version">
+                0.3.51
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial for making <em>Dendrograms</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#how-to-create-dendrograms">How to create Dendrograms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Neuroboom</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial for making <em>Dendrograms</em></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dendrogram_tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-for-making-dendrograms">
+<h1>Tutorial for making <em>Dendrograms</em><a class="headerlink" href="#tutorial-for-making-dendrograms" title="Permalink to this headline">¶</a></h1>
+<p>What are Dendrograms?</p>
+<p>Dendrograms are 2D representations of 3D neuronal reconstructions which preserve the neuron’s topology (shape).
+The value of dendrograms is that specific presynaptic and postsynaptic connectivity can be visualised in an immediately parsable manner.</p>
+<p>To appreciate what kind of structural information is contained within dendrograms, and how that relates to biological function, we will use the results from Felsenberg <em>et al.</em>, 2018, <em>Cell</em>.
+The original dendrogram code was originally created for this paper which used manual, <em>CATMAID</em> reconstructions.
+The code has since been developed to handle reconstructions from different environments, such as the hemibrain volume released in 2020 by Janelia Research Campus.</p>
+<p>As an example, let’s take a look at figure 4 from Felsenberg et al., 2018.</p>
+<a class="with-shadow reference internal image-reference" href="_images/fig4_A.png"><img alt="_images/fig4_A.png" class="with-shadow" src="_images/fig4_A.png" style="width: 800px;" /></a>
+<p>We have three neurons:</p>
+<ol class="arabic simple">
+<li><p>MVP2 (blue, also known as MBON11 or MBON-y1ped&gt;a/B)</p></li>
+<li><p>M6 (magenta, also known as MBON01 or MBON-y5B`2a)</p></li>
+<li><p>M4 (orange, also known as MBON03 or MBON-B`2mp)</p></li>
+</ol>
+<p><strong>MVP2 is presynaptic to both M6 and M4.</strong>
+However, the locations of MVP2 presynapses differ between the postsynaptic neurons M6 and M4.</p>
+<p>For M6, we can see that the MVP2 presynapses are, in general, located at the root of the dendritic tree.</p>
+<a class="with-shadow reference internal image-reference" href="_images/fig_4_E_F.png"><img alt="_images/fig_4_E_F.png" class="with-shadow" src="_images/fig_4_E_F.png" style="width: 800px;" /></a>
+<p>In contrast, the MVP2 presynapses onto M4 are located on the distal branches of M4.</p>
+<a class="with-shadow reference internal image-reference" href="_images/fig_4_C_D.png"><img alt="_images/fig_4_C_D.png" class="with-shadow" src="_images/fig_4_C_D.png" style="width: 800px;" /></a>
+<p>This specific synaptic layout enables MVP2, which is GABAergic, to inhibit M6 more easily compared to M4.
+This inhibition is required for aversive memory extinction i.e. for learning that things that were once aversively conditioned, no longer are (forgetting).</p>
+</section>
+<section id="how-to-create-dendrograms">
+<h1>How to create Dendrograms<a class="headerlink" href="#how-to-create-dendrograms" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial will focus on creating dendrograms using the hemibrain dataset, released by Janelia Research Campus in 2020.</p>
+<p>First, import neuroboom’s dendrogram code and the other dependencies.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">navis</span> <span class="k">as</span> <span class="nn">nv</span>
+<span class="kn">from</span> <span class="nn">navis.interfaces</span> <span class="kn">import</span> <span class="n">neuprint</span> <span class="k">as</span> <span class="n">nvneu</span>
+<span class="kn">from</span> <span class="nn">neuroboom</span> <span class="kn">import</span> <span class="n">dendrogram</span> <span class="k">as</span> <span class="n">nbd</span>
+</pre></div>
+</div>
+<p>Neuroboom’s functionality heavily relies on a package called <strong>navis</strong>, created by Philipp Schlegel.
+So lets get some example neurons to work with.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># first lets first an example neuron id</span>
+<span class="n">example_neuron</span> <span class="o">=</span> <span class="n">navis</span><span class="o">.</span><span class="n">example_neurons</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">id</span>
+
+<span class="c1"># Now we have to fetch the skeleton -- this is important, the dendrogram code works on skeleton objects, not neuron objects</span>
+<span class="n">example_skeleton</span> <span class="o">=</span> <span class="n">nvneu</span><span class="o">.</span><span class="n">fetch_skeletons</span><span class="p">(</span><span class="n">example_neuron</span><span class="p">,</span> <span class="n">heal</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the dendrogram</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">nbd</span><span class="o">.</span><span class="n">plot_dendrogram</span><span class="p">(</span><span class="n">example_skeleton</span><span class="p">,</span> <span class="n">prog</span> <span class="o">=</span> <span class="s1">&#39;dot&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="with-shadow reference internal image-reference" href="_images/example_dot.png"><img alt="_images/example_dot.png" class="with-shadow" src="_images/example_dot.png" style="width: 800px;" /></a>
+<p>The <strong>prog</strong> argument here determines the type of layout.
+For <em>dot</em>, this produces a hierarchical layout, with the leaf nodes at the top of the hierarchy and the soma at the bottom
+Setting the <strong>prog</strong> argument to <em>neato</em> however, produces the layout seen in Felsenberg <em>et al.</em>, 2018 and in the example below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the neato dendrogram</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">nbd</span><span class="o">.</span><span class="n">plot_dendrogram</span><span class="p">(</span><span class="n">example_skeleton</span><span class="p">,</span> <span class="n">downsample_neuron</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">prog</span> <span class="o">=</span> <span class="s1">&#39;neato&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="with-shadow reference internal image-reference" href="_images/example_neato.png"><img alt="_images/example_neato.png" class="with-shadow" src="_images/example_neato.png" style="width: 800px;" /></a>
+<p>In the <em>neato</em> type of layout, imagine a spring representing each edge in the graph.
+The <em>force</em> in this spring is proportional to the length of the two nodes connected by that edge.
+The springs are allowed to then settle and an equilibrium is found which minimises the crossover of edges.</p>
+<p>** NOTE: the neato layout can take some to time to calculate **
+** Therefore, it  is highly recommended to downsample the neuron (reduce the number of nodes) **</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Markus William Pleijzier.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

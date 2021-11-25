@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>neuroboom &mdash; Neuroboom 0.3.51 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Neuroboom
+          </a>
+              <div class="version">
+                0.3.51
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dendrogram_tutorial.html">Tutorial for making <em>Dendrograms</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dendrogram_tutorial.html#how-to-create-dendrograms">How to create Dendrograms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Neuroboom</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>neuroboom</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="neuroboom">
+<h1>neuroboom<a class="headerlink" href="#neuroboom" title="Permalink to this headline">¶</a></h1>
+<p><strong>Welcome to neuroboom</strong>!</p>
+<a class="with-shadow reference internal image-reference" href="_images/nb_small_logo.png"><img alt="_images/nb_small_logo.png" class="with-shadow" src="_images/nb_small_logo.png" style="width: 1200px;" /></a>
+<p>Neuroboom is a suite of Python3 tools for analysing neuron reconstructions within Connectomic initiatives.
+Neuroboom is currently designed to operate on neuron recontructions within the <em>CATMAID</em> or <em>Neuprint</em> platforms.</p>
+<p>These two different platforms reflect the two available connectomic efforts in the fruit fly, Drosophila melanogaster:</p>
+<ol class="arabic simple">
+<li><p>the <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0092867418307876?via%3Dihub">Full Adult Female Brain (FAFB)</a> Zheng <em>et al.</em>, 2018, <em>Cell</em></p></li>
+<li><p>the <a class="reference external" href="https://elifesciences.org/articles/57443">Hemibrain</a>, Scheffer <em>et al.</em>, 2020, <em>eLife</em></p></li>
+</ol>
+<p>Some code incorporated within the neuroboom package has been presented in scientific papers, most notably the <strong>dendrogram</strong> functions:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0092867418310377?via%3Dihub">Integration of Parallel Opposing Memories Underlies Memory Extinction</a>, J. Felsenberg <em>et al.</em>, 2018, <em>Cell</em></p></li>
+<li><p><a class="reference external" href="https://www.cell.com/current-biology/fulltext/S0960-9822(20)30764-8">Input Connectivity Reveals Additional Heterogeneity of Dopaminergic Reinforcement in Drosophila</a>, N. Otto, <strong>MW Pleijzier</strong> <em>et al.</em>, 2018, <em>Current Biology</em></p></li>
+<li><p><a class="reference external" href="https://www.biorxiv.org/content/10.1101/2020.06.08.141341v1">Convergence of distinct subpopulations of mechanosensory neurons onto a neural circuit that elicits grooming</a>, S. Hampel <em>et al.</em>, 2020, <em>biorXiv</em></p></li>
+</ol>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dendrogram_tutorial.html">Tutorial for making <em>Dendrograms</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dendrogram_tutorial.html#how-to-create-dendrograms">How to create Dendrograms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Markus William Pleijzier.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
