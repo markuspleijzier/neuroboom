@@ -127,6 +127,7 @@ def plot_dendrogram(
     presyn_size: float = 0.1,
     postsyn_size: float = 0.1,
     prog: str = "dot",
+    node_size: int = 0
 ):
 
     """
@@ -282,7 +283,7 @@ def plot_dendrogram(
         x.connectors = x.connectors[x.connectors.connector_id.isin(connectors_included)]
 
     if downsample_neuron > 0:
-        
+
         print("Downsampling neuron, factor = {}".format(downsample_neuron))
 
         nodes_to_keep = []
@@ -313,7 +314,7 @@ def plot_dendrogram(
 
     # Plotting tree with the above layout
     print("Plotting Tree...")
-    nx.draw(g, pos, node_size=0, arrows=False, width=0.25)
+    nx.draw(g, pos, node_size=node_size, arrows=False, width=0.25)
 
     # Whether to add soma or not
     if not fragment:
