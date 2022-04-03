@@ -15,6 +15,76 @@ from neuroboom.utils import calc_cable, check_valid_neuron_input
 # This script contains functions for plotting dendrograms, static and interactive
 
 
+def prepare_neuron_for_dendrogram(
+    x: Union[navis.TreeNeuron, navis.NeuronList],
+    heal_neuron: bool = False,
+    connector_confidence: Tuple[float, float] = (0.0, 0.0),
+    downsample_neuron: float = 0.0,
+    highlight_nodes: Optional = None
+):
+    start = time.time()
+
+    x = check_valid_neuron_input(x)
+
+    if heal_neuron:
+
+        print("Healing neuron...")
+        navis.heal_skeleton(x, inplace = True)
+
+    if any(connector_confidence) > 0.0:
+
+        print(
+            """Thresholding synapses: only considering presynapses above {}
+            confidence and postsynapses above {}""".format(
+                connector_confidence[0], connector_confidence[1]))
+
+        presyn_included = x.connectors[x.connectors.type == 'pre'][x.connectors.confidence > connector_confidence[0]
+                                                                  ].connector_id.tolist()
+
+        postsyn_included = x.connectors[x.connectors.type == 'post'][x.connectors.confidence > connector_confidence[1]
+                                                                    ].connector_id.tolist()
+
+        connectors_included = list(chain.from_iterable([presyn_included, postsyn_included]))
+
+        x.connectors = x.connectors[x.connectors.connector_id.isin(connectors_included)]
+
+    if downsample_neuron > 0:
+
+        print('Downsampling neuron, factor = {}'.format(downsample_neuron))
+
+        nodes_to_keep = []
+
+        if highlight_nodes is not None:
+
+            node_list = list(highlight_nodes.keys())
+
+            nodes_to_keep.append(node_list)
+
+        else:
+
+            nodes_to_keep.append(x.connectors.node_id.unique().tolist())
+
+        nodes_to_keep = list(chain.from_iterable(nodes_to_keep))
+
+        x = navis.downsample_neuron(
+            x,
+            downsampling_factor=downsample_neuron,
+            preserve_nodes=nodes_to_keep)
+
+    if 'parent_dist' not in x.nodes:
+        print('Calculating cable length...')
+        x = calc_cable(x, return_skdata=True)
+
+    if isinstance(x.connectors.type[0], np.int64):
+
+        print('Converting connector types to strings...')
+        connector_type_conv = {0 : 'pre', 1 : 'post'}
+        x.connectors.type = x.connectors.type.map(connector_type_conv)
+
+    print("Completed in %is" % int(time.time() - start))
+
+    return(x)
+
 def create_graph_structure(
     neuron: Union[navis.TreeNeuron, navis.NeuronList],
     xyz_locs: bool = True,
@@ -42,6 +112,8 @@ def create_graph_structure(
     Examples
     --------
     """
+
+    start = time.time()
 
     neuron = check_valid_neuron_input(neuron)
 
@@ -89,6 +161,7 @@ def create_graph_structure(
     if returned_object == "graph":
         if verbose:
             print("Returning graph only")
+            print("Completed in %is" % int(time.time() - start))
         return g
 
     elif returned_object == "positions":
@@ -97,6 +170,7 @@ def create_graph_structure(
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
         if verbose:
             print("Returning positions only")
+            print("Completed in %is" % int(time.time() - start))
         return pos
 
     elif returned_object == "graph_and_positions":
@@ -105,12 +179,159 @@ def create_graph_structure(
         pos = nx.nx_agraph.graphviz_layout(g, prog=prog)
         if verbose:
             print("Returning graph and positions")
+            print("Completed in %is" % int(time.time() - start))
         return (g, pos)
 
+def plot_dendrogram_from_graph(
+    g: nx.classes.digraph.DiGraph,
+    pos: dict,
+    x: navis.TreeNeuron,
+    node_size: int = 0,
+    linewidth: float = 0.25,
+    fragment: bool = False,
+    plot_connectors: bool = True,
+    presyn_color: List[List[float]] = [[0.9, 0.0, 0.0]],
+    presyn_size: float = 0.1,
+    postsyn_color: float = 0.1,
+    postsyn_size: float = 0.1,
+    highlight_nodes: Optional = None,
+    highlight_connectors: Optional = None,
+    highlight_connector_color: List[List[float]] = [[0.0, 0.9, 0.0]],
+    highlight_connector_size: int = 20,
 
-# dendrogram
+):
+    start = time.time()
+
+    print('Plotting Tree...')
+
+    nx.draw(g, pos, node_size = node_size, arrows = False, width = linewidth)
+
+    if not fragment:
+
+        if type(x.soma) == np.ndarray:
+
+            print('Plotting soma')
+
+            soma = x.soma[0]
+            plt.scatter([pos[soma][0]],
+                        [pos[soma][1]],
+                        s=80,
+                        c=[[0, 0, 0]],
+                        zorder=1)
+
+        else:
+
+            print('Plotting soma')
+
+            plt.scatter([pos[x.soma][0]],
+                        [pos[x.soma][1]],
+                        s=80,
+                        c=[[0, 0, 0,]],
+                        zorder=1)
+
+    if plot_connectors:
+
+        print('Plotting connectors...')
+
+        plt.scatter(
+            [
+                pos[tn][0] for tn in x.connectors[x.connectors.type == 'pre'].node_id.values
+
+            ],
+            [
+                pos[tn][1] for tn in x.connectors[x.connectors.type == 'pre'].node_id.values
+
+            ],
+            c=[presyn_color] * len([pos[tn][1] for tn in x.connectors[x.connectors.type == 'pre'].node_id.values]),
+            zorder=2,
+            s=presyn_size,
+            linewidths=1)
+
+        plt.scatter(
+
+            [
+                pos[tn][0] for tn in x.connectors[x.connectors.type == 'post'].node_id.values
+
+            ],
+            [
+                pos[tn][1] for tn in x.connectors[x.connectors.type == 'post'].node_id.values
+
+            ],
+            c=[postsyn_color] * len([pos[tn][1] for tn in x.connectors[x.connectors.type == 'post'].node_id.values]),
+            zorder=2,
+            s=postsyn_size,
+            linewidths=1)
+
+        if highlight_nodes is not None:
+
+            if isinstance(highlight_nodes, dict):
+
+                hl_tn_coords = np.array(
+                    [
+                        pos[tn] for tn in highlight_nodes.keys()
+                    ]
+                )
+
+                tn_col = [highlight_nodes[i] for i in highlight_nodes.keys()]
+
+                plt.scatter(
+
+                    hl_tn_coords[:, 0],
+                    hl_tn_coords[:, 1],
+                    s=10,
+                    c=tn_col,
+                    zorder=3)
 
 
+        if highlight_connectors is not None:
+
+            if isinstance(highlight_connectors, (list, np.ndarray)):
+
+                hl_cn_coords = np.array(
+
+                    [
+                        pos[tn] for tn in x.connectors[x.connectors.connector_id.isin(highlight_connectors)].node_id
+                    ]
+                )
+
+                plt.scatter(
+                    hl_cn_coords[:,0],
+                    hl_cn_coords[:,1],
+                    s=highlight_connector_size,
+                    c=highlight_connector_color,
+                    zorder=3)
+
+            elif isinstance(highlight_connectors, dict):
+                for cn in highlight_connectors:
+                    if cn in highlight_connectors:
+                        if cn is None:
+                            continue
+                        if cn not in x.connectors.connector_id.values:
+                            print("Connector {} is not present in the neuron/fragment".format(cn))
+                        hl_cn_coords = np.array(
+                            [
+                                pos[tn] for tn in x.connectors[x.connectors.connector_id == cn].node_id
+                            ]
+                        )
+                        plt.scatter(
+                            hl_cn_coords[:,0],
+                            hl_cn_coords[:,1],
+                            s=highlight_connector_size,
+                            color=highlight_connectors[cn],
+                            zorder=3
+                        )
+            else:
+
+                raise TypeError(
+
+                    "Unable to highlight connectors from data of type {}".format(type(highlight_connectors))
+
+                )
+
+        print("Completed in %is" % int(time.time() - start))
+
+
+# plot dendrogram from start to finish
 def plot_dendrogram(
     x: Union[navis.TreeNeuron, navis.NeuronList],
     heal_neuron: bool = False,
@@ -127,11 +348,12 @@ def plot_dendrogram(
     presyn_size: float = 0.1,
     postsyn_size: float = 0.1,
     prog: str = "dot",
-    node_size: int = 0
+    node_size: int = 0,
+    linewidth: float = 0.25
 ):
 
     """
-    This function creates a 2-dimensional dendrogram, a 'flattened' version of a neuron.
+    This function creates a 2-dimensional dendrogram, a 'flattened' representation of a neuron.
     Dendrograms can be used to visualise the locations of specific partner synapses.
 
     Parameters
@@ -262,7 +484,7 @@ def plot_dendrogram(
 
     if heal_neuron:
         print("Healing Neuron...")
-        navis.heal_fragmented_neuron(x, inplace=True)
+        navis.heal_skeleton(x, inplace=True)
 
     if any(connector_confidence) > 0.0:
         print(
@@ -314,7 +536,7 @@ def plot_dendrogram(
 
     # Plotting tree with the above layout
     print("Plotting Tree...")
-    nx.draw(g, pos, node_size=node_size, arrows=False, width=0.25)
+    nx.draw(g, pos, node_size=node_size, arrows=False, width=linewidth)
 
     # Whether to add soma or not
     if not fragment:
@@ -439,7 +661,6 @@ def plot_dendrogram(
             )
 
     print("Completed in %is" % int(time.time() - start))
-
 
 # Plot an interactive dendrogram
 def interactive_dendrogram(
