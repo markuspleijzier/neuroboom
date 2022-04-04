@@ -262,71 +262,71 @@ def plot_dendrogram_from_graph(
             s=postsyn_size,
             linewidths=1)
 
-        if highlight_nodes is not None:
+    if highlight_nodes is not None:
 
-            if isinstance(highlight_nodes, dict):
+        if isinstance(highlight_nodes, dict):
 
-                hl_tn_coords = np.array(
-                    [
-                        pos[tn] for tn in highlight_nodes.keys()
-                    ]
-                )
+            hl_tn_coords = np.array(
+                [
+                    pos[tn] for tn in highlight_nodes.keys()
+                ]
+            )
 
-                tn_col = [highlight_nodes[i] for i in highlight_nodes.keys()]
+            tn_col = [highlight_nodes[i] for i in highlight_nodes.keys()]
 
-                plt.scatter(
+            plt.scatter(
 
-                    hl_tn_coords[:, 0],
-                    hl_tn_coords[:, 1],
-                    s=10,
-                    c=tn_col,
-                    zorder=3)
+                hl_tn_coords[:, 0],
+                hl_tn_coords[:, 1],
+                s=10,
+                c=tn_col,
+                zorder=3)
 
 
-        if highlight_connectors is not None:
+    if highlight_connectors is not None:
 
-            if isinstance(highlight_connectors, (list, np.ndarray)):
+        if isinstance(highlight_connectors, (list, np.ndarray)):
 
-                hl_cn_coords = np.array(
+            hl_cn_coords = np.array(
 
-                    [
-                        pos[tn] for tn in x.connectors[x.connectors.connector_id.isin(highlight_connectors)].node_id
-                    ]
-                )
+                [
+                    pos[tn] for tn in x.connectors[x.connectors.connector_id.isin(highlight_connectors)].node_id
+                ]
+            )
 
-                plt.scatter(
-                    hl_cn_coords[:,0],
-                    hl_cn_coords[:,1],
-                    s=highlight_connector_size,
-                    c=highlight_connector_color,
-                    zorder=3)
+            plt.scatter(
+                hl_cn_coords[:,0],
+                hl_cn_coords[:,1],
+                s=highlight_connector_size,
+                c=highlight_connector_color,
+                zorder=3)
 
-            elif isinstance(highlight_connectors, dict):
-                for cn in highlight_connectors:
-                    if cn in highlight_connectors:
-                        if cn is None:
-                            continue
-                        if cn not in x.connectors.connector_id.values:
-                            print("Connector {} is not present in the neuron/fragment".format(cn))
-                        hl_cn_coords = np.array(
-                            [
-                                pos[tn] for tn in x.connectors[x.connectors.connector_id == cn].node_id
-                            ]
-                        )
-                        plt.scatter(
-                            hl_cn_coords[:,0],
-                            hl_cn_coords[:,1],
-                            s=highlight_connector_size,
-                            color=highlight_connectors[cn],
-                            zorder=3
-                        )
-            else:
+        elif isinstance(highlight_connectors, dict):
+            for cn in highlight_connectors:
+                if cn in highlight_connectors:
+                    if cn is None:
+                        continue
+                    if cn not in x.connectors.connector_id.values:
+                        print("Connector {} is not present in the neuron/fragment".format(cn))
+                    hl_cn_coords = np.array(
+                        [
+                            pos[tn] for tn in x.connectors[x.connectors.connector_id == cn].node_id
+                        ]
+                    )
+                    plt.scatter(
+                        hl_cn_coords[:,0],
+                        hl_cn_coords[:,1],
+                        s=highlight_connector_size,
+                        color=highlight_connectors[cn],
+                        zorder=3
+                    )
+        else:
 
-                raise TypeError(
+            raise TypeError(
 
-                    "Unable to highlight connectors from data of type {}".format(type(highlight_connectors))
+                "Unable to highlight connectors from data of type {}".format(type(highlight_connectors))
 
-                )
+            )
 
         print("Completed in %is" % int(time.time() - start))
 
