@@ -255,7 +255,8 @@ def permut_test(
 
     x = check_valid_neuron_input(x)
 
-    geo_mat = navis.geodesic_matrix(x, node_ids=measuring_node)
+    # geo_mat = navis.geodesic_matrix(x, node_ids=measuring_node)
+    geo_mat = navis.geodesic_matrix(x, from_=measuring_node)
     geo_mat = geo_mat.T
     geo_mat.sort_values(by=[measuring_node], ascending=True, inplace=True)
 
